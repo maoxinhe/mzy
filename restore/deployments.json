@@ -1,0 +1,169 @@
+{
+  "result": {
+    "deployments": [
+      {
+        "id": "4d231846-e9f6-44e1-8061-a127106c417a",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "2df6d8c7-dea2-43e3-b928-c9ebe015d518",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T14:15:40.399552Z"
+      },
+      {
+        "id": "58e64091-1ccc-49ad-93b3-e0e5ab789142",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "ba0cec3d-6457-4b2c-a0cc-3c73b9254f89",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T14:05:55.155532Z"
+      },
+      {
+        "id": "75892023-36c6-4609-8281-e018e8b65181",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "8b65ecbb-4527-4724-bfcc-3e74f92ddf22",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T14:02:36.199416Z"
+      },
+      {
+        "id": "b66720c3-bada-450b-8b08-d5d73f9206ef",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "862d4f48-a827-40ad-84a5-8678f8bb674e",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T13:57:48.129473Z"
+      },
+      {
+        "id": "58080a62-f0b2-443e-958b-ec9ae892249b",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "442fd3f3-12b7-45e8-81bd-64964255cb17",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T13:42:03.663599Z"
+      },
+      {
+        "id": "8b5a125b-ccb4-48a2-a6ab-98044c238755",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "728c20ae-545f-4cbe-9e18-dd6b861960ab",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T13:39:11.18972Z"
+      },
+      {
+        "id": "9285202a-3f96-4f8f-9750-7e5ea971ecd4",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "2740e90f-28f7-4eb7-b842-dca12ca2cc53",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T13:25:12.237586Z"
+      },
+      {
+        "id": "5c59e2c2-7bf0-4dde-b3fb-7db34011e686",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "a48dd687-7af2-4757-b044-8bbec116f83a",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T13:20:03.419282Z"
+      },
+      {
+        "id": "ffdeca22-e8c3-4949-9e55-1b0965b96304",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "secret"
+        },
+        "versions": [
+          {
+            "version_id": "1b3cef45-5c3b-429b-b246-32650187b87e",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T13:19:43.937567Z"
+      },
+      {
+        "id": "98bd2c8b-c433-4f9b-9495-dd9915900085",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "catkinr@163.com",
+        "annotations": {
+          "workers/triggered_by": "secret"
+        },
+        "versions": [
+          {
+            "version_id": "c390e75e-8724-4266-bf0a-7ff956055bd5",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-08-30T13:19:39.397145Z"
+      }
+    ]
+  },
+  "success": true,
+  "errors": [],
+  "messages": []
+}

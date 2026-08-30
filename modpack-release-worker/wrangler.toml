@@ -1,0 +1,24 @@
+name = "modpack-release"
+main = "src/index.js"
+compatibility_date = "2025-08-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "MODS_KV"
+id = "e4d70dfbb2f64e898b1da0ea167e8104"
+
+[[r2_buckets]]
+binding = "MODS_R2"
+bucket_name = "modpack-mods"
+
+[vars]
+ADMIN_LOGIN = "maoxinhe"
+BASE_URL = "https://releases.camzy.uno"
+MAX_UPLOAD_MB = "100"
+REPO_BRANCH = "main"
+REPO_NAME = "modpack"
+REPO_OWNER = "maoxinhe"
+SESSION_TTL_HOURS = "168"

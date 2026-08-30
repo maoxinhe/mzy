@@ -1,0 +1,103 @@
+{
+  "result": {
+    "id": "2df6d8c7-dea2-43e3-b928-c9ebe015d518",
+    "number": 15,
+    "metadata": {
+      "created_on": "2026-08-30T14:15:39.757944Z",
+      "source": "wrangler",
+      "author_id": "22206aed12edd33e2bfab176554fb80b",
+      "author_email": "catkinr@163.com",
+      "has_preview": true
+    },
+    "annotations": {
+      "workers/triggered_by": "version_upload"
+    },
+    "resources": {
+      "script": {
+        "etag": "52249f8b0051e842575c95f4f6aa55e236cc379ffd771d05b4891c0e03a61384",
+        "handlers": [
+          "fetch"
+        ],
+        "last_deployed_from": "wrangler"
+      },
+      "script_runtime": {
+        "assets": {
+          "serve_directly": false,
+          "raw_run_worker_first": true
+        },
+        "compatibility_date": "2025-08-01",
+        "usage_model": "standard"
+      },
+      "bindings": [
+        {
+          "name": "ADMIN_LOGIN",
+          "text": "maoxinhe",
+          "type": "plain_text"
+        },
+        {
+          "name": "ASSETS",
+          "type": "assets"
+        },
+        {
+          "name": "BASE_URL",
+          "text": "https://releases.camzy.uno",
+          "type": "plain_text"
+        },
+        {
+          "name": "DEV_AUTH_TOKEN",
+          "type": "secret_text"
+        },
+        {
+          "name": "GITHUB_CLIENT_ID",
+          "type": "secret_text"
+        },
+        {
+          "name": "GITHUB_CLIENT_SECRET",
+          "type": "secret_text"
+        },
+        {
+          "name": "GITHUB_TOKEN",
+          "type": "secret_text"
+        },
+        {
+          "name": "MAX_UPLOAD_MB",
+          "text": "100",
+          "type": "plain_text"
+        },
+        {
+          "name": "MODS_KV",
+          "namespace_id": "e4d70dfbb2f64e898b1da0ea167e8104",
+          "type": "kv_namespace"
+        },
+        {
+          "bucket_name": "modpack-mods",
+          "name": "MODS_R2",
+          "type": "r2_bucket"
+        },
+        {
+          "name": "REPO_BRANCH",
+          "text": "main",
+          "type": "plain_text"
+        },
+        {
+          "name": "REPO_NAME",
+          "text": "modpack",
+          "type": "plain_text"
+        },
+        {
+          "name": "REPO_OWNER",
+          "text": "maoxinhe",
+          "type": "plain_text"
+        },
+        {
+          "name": "SESSION_TTL_HOURS",
+          "text": "168",
+          "type": "plain_text"
+        }
+      ]
+    }
+  },
+  "success": true,
+  "errors": [],
+  "messages": []
+}
