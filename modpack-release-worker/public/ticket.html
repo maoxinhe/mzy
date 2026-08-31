@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>梦之韵 · 工单系统</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="logo">🎫</span>
+      <span>梦之韵工单系统 <small>留言 · 反馈 · 人工回复</small></span>
+    </div>
+    <div class="topbar-actions">
+      <a href="/" class="btn btn-sm">返回下载页</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="hero" style="padding-bottom:16px;">
+      <div class="ver-badge" style="font-size:38px;">工单系统</div>
+      <div class="sub">有问题、建议或反馈？填写下方表单，我们会尽快通过邮件回复你。</div>
+    </div>
+
+    <div class="card">
+      <h2>✍️ 提交工单</h2>
+      <form id="ticketForm" style="display:flex; flex-direction:column; gap:18px;">
+        <div>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">简称（怎么称呼你）</label>
+          <input class="input" id="nickname" maxlength="20" placeholder="例如：小明" required>
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">游戏名</label>
+          <input class="input" id="gamename" maxlength="40" placeholder="你的游戏内名称" required>
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">用户邮箱（用于接收验证码与回复）</label>
+          <input class="input" id="email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">留言内容</label>
+          <textarea class="input" id="content" rows="6" maxlength="5000" placeholder="请描述你遇到的问题或建议…" style="resize:vertical;" required></textarea>
+        </div>
+        <button type="submit" id="submitBtn" class="btn btn-primary big-btn" style="width:100%;">发送验证码并提交</button>
+        <p style="color:var(--muted); font-size:12px; text-align:center;">我们会先向你的邮箱发送验证码确认邮箱真实性，验证通过后工单才会正式提交。</p>
+      </form>
+
+      <div id="verifyStep" class="card" hidden style="margin-top:22px; box-shadow:none; background:rgba(255,255,255,.5);">
+        <h2>🔑 输入邮箱验证码</h2>
+        <p style="color:var(--muted); margin-bottom:16px;">验证码已发送到 <b style="color:var(--pink-dark);" id="verifyEmail"></b>，请在 10 分钟内输入。</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <input class="input" id="code" maxlength="6" inputmode="numeric" placeholder="6 位验证码"
+                 style="flex:1; min-width:160px; text-align:center; font-size:24px; letter-spacing:8px;" required>
+          <button id="verifyBtn" class="btn btn-primary big-btn" style="min-width:160px;">验证并提交</button>
+        </div>
+        <p style="color:var(--muted); font-size:12px; margin-top:12px;">没收到？请检查垃圾邮件箱；若验证码过期，可返回重新提交。</p>
+      </div>
+
+      <div id="doneBox" class="card" hidden style="margin-top:22px; box-shadow:none; background:rgba(255,255,255,.5); text-align:center;">
+        <div style="font-size:46px; margin-bottom:10px;">✅</div>
+        <h2 style="justify-content:center;">工单提交成功</h2>
+        <p style="color:var(--muted); margin-top:10px; line-height:1.9;">你的工单编号：<b id="doneId" style="color:var(--pink-dark);"></b><br>我们会尽快处理，处理结果将发送到你的邮箱。</p>
+        <a href="/ticket.html" class="btn" style="margin-top:14px;">再提交一个</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="/js/ticket.js"></script>
+</body>
+</html>

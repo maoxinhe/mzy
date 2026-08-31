@@ -1655,6 +1655,168 @@ async function handleAdminReleaseDelete(request, env, id) {
   }
 }
 __name(handleAdminReleaseDelete, "handleAdminReleaseDelete");
+
+// ==================== 工单系统 ====================
+// 通过 Resend HTTP API 发送纯文本邮件
+async function sendEmail(env, to, subject, body) {
+  const apiKey = env.RESEND_API_KEY;
+  if (!apiKey || apiKey.startsWith("re_xxxx")) throw new Error("\u672A\u914D\u7F6E RESEND_API_KEY");
+  const from = env.MAIL_FROM || "\u5DE5\u5355\u7CFB\u7EDF <noreply@camzy.uno>";
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ from, to: [to], subject, text: body })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Resend ${res.status}: ${data.message || JSON.stringify(data)}`);
+  return data;
+}
+__name(sendEmail, "sendEmail");
+function isValidEmail(s) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+}
+__name(isValidEmail, "isValidEmail");
+function ticketId(d) {
+  const p = (n, l = 2) => String(n).padStart(l, "0");
+  return `T${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${Math.floor(100 + Math.random() * 900)}`;
+}
+__name(ticketId, "ticketId");
+async function handleTicketSubmit(request, env) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const nickname = String(body.nickname || "").trim();
+    const gamename = String(body.gamename || "").trim();
+    const email = String(body.email || "").trim();
+    const content = String(body.content || "").trim();
+    if (!nickname || !gamename || !email || !content) {
+      return json({ error: "\u8BF7\u586B\u5199\u7B80\u79F0\u3001\u6E38\u620F\u540D\u3001\u90AE\u7BB1\u548C\u7559\u8A00\u5185\u5BB9" }, 400);
+    }
+    if (nickname.length > 20 || gamename.length > 40 || content.length > 5000) {
+      return json({ error: "\u5185\u5BB9\u957F\u5EA6\u8D85\u51FA\u9650\u5236" }, 400);
+    }
+    if (!isValidEmail(email)) return json({ error: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E" }, 400);
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const pending = { nickname, gamename, email, content, code, at: new Date().toISOString() };
+    await env.MODS_KV.put(`ticket:verify:${email.toLowerCase()}`, JSON.stringify(pending), { expirationTtl: 600 });
+    try {
+      await sendEmail(env, email, "【\u68A6\u4E4B\u97F5\u5DE5\u5355】\u90AE\u7BB1\u9A8C\u8BC1\u7801",
+        `\u4F60\u597D ${nickname} \uFF1A\n\n\u4F60\u6B63\u5728\u68A6\u4E4B\u97F5\u63D0\u4EA4\u5DE5\u5355\uFF0C\u4F60\u7684\u9A8C\u8BC1\u7801\u662F\uFF1A${code}\n\n\u8BF7\u5728 10 \u5206\u949F\u5185\u586B\u5199\u9A8C\u8BC1\u7801\u5B8C\u6210\u63D0\u4EA4\u3002\u5982\u975E\u672C\u4EBA\u64CD\u4F5C\uFF0C\u8BF7\u5FFD\u7565\u672C\u90AE\u4EF6\u3002\n\n\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`);
+    } catch (e) {
+      await env.MODS_KV.delete(`ticket:verify:${email.toLowerCase()}`).catch(() => {
+      });
+      return json({ error: "\u9A8C\u8BC1\u7801\u90AE\u4EF6\u53D1\u9001\u5931\u8D25\uFF1A" + e.message }, 502);
+    }
+    return json({ ok: true, message: `\u9A8C\u8BC1\u7801\u5DF2\u53D1\u9001\u5230 ${email}\uFF0C\u8BF7\u5728 10 \u5206\u949F\u5185\u586B\u5199` });
+  } catch (e) {
+    return json({ error: e.message || "\u63D0\u4EA4\u5931\u8D25" }, 500);
+  }
+}
+__name(handleTicketSubmit, "handleTicketSubmit");
+async function handleTicketVerify(request, env) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const email = String(body.email || "").trim().toLowerCase();
+    const code = String(body.code || "").trim();
+    const raw = await env.MODS_KV.get(`ticket:verify:${email}`);
+    if (!raw) return json({ error: "\u9A8C\u8BC1\u7801\u5DF2\u8FC7\u671F\uFF0C\u8BF7\u91CD\u65B0\u63D0\u4EA4" }, 400);
+    const pending = JSON.parse(raw);
+    if (pending.code !== code) return json({ error: "\u9A8C\u8BC1\u7801\u4E0D\u6B63\u786E" }, 400);
+    await env.MODS_KV.delete(`ticket:verify:${email}`);
+    const id = ticketId(new Date());
+    const ticket = {
+      id,
+      nickname: pending.nickname,
+      gamename: pending.gamename,
+      email: pending.email,
+      content: pending.content,
+      status: "new",
+      createdAt: new Date().toISOString(),
+      replies: []
+    };
+    await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
+    const indexRaw = await env.MODS_KV.get("ticket:index");
+    const index = indexRaw ? JSON.parse(indexRaw) : [];
+    index.unshift(id);
+    await env.MODS_KV.put("ticket:index", JSON.stringify(index.slice(0, 300)));
+    if (env.ADMIN_EMAIL) {
+      try {
+        await sendEmail(env, env.ADMIN_EMAIL, `【\u65B0\u5DE5\u5355】${id} \u6765\u81EA ${ticket.nickname}`,
+          `\u65B0\u5DE5\u5355 ${id}\n\u7B80\u79F0\uFF1A${ticket.nickname}\n\u6E38\u620F\u540D\uFF1A${ticket.gamename}\n\u90AE\u7BB1\uFF1A${ticket.email}\n\u65F6\u95F4\uFF1A${ticket.createdAt}\n\n\u7559\u8A00\u5185\u5BB9\uFF1A\n${ticket.content}`);
+      } catch (e) {
+        console.error("[ticket-notify-admin]", e.message);
+      }
+    }
+    return json({ ok: true, id, message: "\u5DE5\u5355\u63D0\u4EA4\u6210\u529F" });
+  } catch (e) {
+    return json({ error: e.message || "\u9A8C\u8BC1\u5931\u8D25" }, 500);
+  }
+}
+__name(handleTicketVerify, "handleTicketVerify");
+async function handleAdminTickets(env) {
+  const indexRaw = await env.MODS_KV.get("ticket:index");
+  const ids = indexRaw ? JSON.parse(indexRaw) : [];
+  const tickets = [];
+  for (const id of ids) {
+    const raw = await env.MODS_KV.get(`ticket:${id}`);
+    if (raw) {
+      const t = JSON.parse(raw);
+      tickets.push({
+        id: t.id,
+        nickname: t.nickname,
+        gamename: t.gamename,
+        email: t.email,
+        status: t.status,
+        createdAt: t.createdAt,
+        replyCount: (t.replies || []).length,
+        content: t.content
+      });
+    }
+  }
+  return json({ tickets });
+}
+__name(handleAdminTickets, "handleAdminTickets");
+async function handleAdminTicketDetail(env, id) {
+  const raw = await env.MODS_KV.get(`ticket:${id}`);
+  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+  return json({ ticket: JSON.parse(raw) });
+}
+__name(handleAdminTicketDetail, "handleAdminTicketDetail");
+async function handleAdminTicketReply(request, env, id) {
+  try {
+    const raw = await env.MODS_KV.get(`ticket:${id}`);
+    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+    const ticket = JSON.parse(raw);
+    const body = await request.json().catch(() => ({}));
+    const content = String(body.content || "").trim();
+    if (!content) return json({ error: "\u56DE\u590D\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A" }, 400);
+    ticket.replies = ticket.replies || [];
+    ticket.replies.push({ from: "admin", content, at: new Date().toISOString() });
+    if (ticket.status !== "closed") ticket.status = "replied";
+    await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
+    try {
+      await sendEmail(env, ticket.email, `【\u68A6\u4E4B\u97F5\u5DE5\u5355】\u7BA1\u7406\u5458\u56DE\u590D\u4E86\u4F60\u7684\u5DE5\u5355 ${id}`,
+        `\u4F60\u597D ${ticket.nickname} \uFF1A\n\n\u7BA1\u7406\u5458\u56DE\u590D\u4E86\u4F60\u7684\u5DE5\u5355 ${id}\uFF1A\n\n${content}\n\n\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`);
+    } catch (e) {
+      console.error("[ticket-reply-mail]", e.message);
+    }
+    return json({ ok: true, ticket });
+  } catch (e) {
+    return json({ error: e.message || "\u56DE\u590D\u5931\u8D25" }, 500);
+  }
+}
+__name(handleAdminTicketReply, "handleAdminTicketReply");
+async function handleAdminTicketClose(env, id) {
+  const raw = await env.MODS_KV.get(`ticket:${id}`);
+  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+  const ticket = JSON.parse(raw);
+  ticket.status = "closed";
+  await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
+  return json({ ok: true, ticket });
+}
+__name(handleAdminTicketClose, "handleAdminTicketClose");
 var index_default = {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -1701,6 +1863,22 @@ var index_default = {
       if (denied) return denied;
       const id = path.slice("/api/admin/releases/".length);
       if (id && request.method === "DELETE") return handleAdminReleaseDelete(request, env, id);
+      return json({ error: "\u4E0D\u652F\u6301\u7684\u8BF7\u6C42" }, 404);
+    }
+    if (path === "/api/tickets" && request.method === "POST") return handleTicketSubmit(request, env);
+    if (path === "/api/tickets/verify" && request.method === "POST") return handleTicketVerify(request, env);
+    if (path === "/api/admin/tickets" && request.method === "GET") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      return handleAdminTickets(env);
+    }
+    if (path.startsWith("/api/admin/tickets/")) {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      const rest = path.slice("/api/admin/tickets/".length);
+      if (request.method === "GET" && rest) return handleAdminTicketDetail(env, rest);
+      if (request.method === "POST" && rest.endsWith("/reply")) return handleAdminTicketReply(request, env, rest.slice(0, -6));
+      if (request.method === "POST" && rest.endsWith("/close")) return handleAdminTicketClose(env, rest.slice(0, -6));
       return json({ error: "\u4E0D\u652F\u6301\u7684\u8BF7\u6C42" }, 404);
     }
     return env.ASSETS.fetch(request);

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>梦之韵 · 工单管理</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="logo">🎫</span>
+      <span>工单管理 <small>仅管理员可操作</small></span>
+    </div>
+    <div class="topbar-actions">
+      <span id="meArea"></span>
+      <a href="/" class="btn btn-sm">返回下载页</a>
+      <a href="/admin.html" class="btn btn-sm">模组管理</a>
+      <a href="/auth/logout" class="btn btn-danger btn-sm">退出登录</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="needLogin" class="card" hidden>
+      <h2>🔒 需要管理员权限</h2>
+      <p style="color:var(--muted); margin-bottom:16px;">请使用管理员 GitHub 账号登录后才能处理工单。</p>
+      <a href="/auth/login" class="btn btn-primary">使用 GitHub 登录</a>
+    </div>
+
+    <div id="panel" hidden>
+      <div class="card">
+        <h2>📥 工单列表 <span id="ticketCount" class="pill pill-gray" style="margin-left:6px;">0</span></h2>
+        <div id="ticketList" class="mod-list"><div class="empty">加载中…</div></div>
+      </div>
+
+      <div id="detailCard" class="card" hidden>
+        <h2>💬 处理工单 <span id="detailId" class="pill pill-green" style="margin-left:6px;"></span></h2>
+        <div id="detailBody" style="line-height:1.9;"></div>
+        <hr style="border:none; border-top:1px solid var(--border); margin:18px 0;">
+        <h2 style="font-size:15px;">回复用户（将发送到用户邮箱）</h2>
+        <textarea id="replyContent" class="input" rows="4" style="resize:vertical; margin-top:10px;" placeholder="输入回复内容…"></textarea>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:14px;">
+          <button id="replyBtn" class="btn btn-primary">💬 发送回复</button>
+          <button id="closeBtn" class="btn btn-danger">🔒 关闭工单</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="/js/tickets-admin.js"></script>
+</body>
+</html>

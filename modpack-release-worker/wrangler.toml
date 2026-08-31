@@ -22,3 +22,8 @@ REPO_BRANCH = "main"
 REPO_NAME = "modpack"
 REPO_OWNER = "maoxinhe"
 SESSION_TTL_HOURS = "168"
+# ---- 工单系统邮件（Resend HTTP API）----
+RESEND_API_KEY = "re_xxxxxxxxxxxx" # 请替换为你的 Resend API Key
+MAIL_FROM = "工单系统 <noreply@camzy.uno>"
+# 管理员收件邮箱（新工单通知）
+ADMIN_EMAIL = "catkinr@qq.com"
