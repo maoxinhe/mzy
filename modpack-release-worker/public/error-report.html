@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>梦之韵 · 错误报告分析</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .file-drop {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 26px 18px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+    .file-drop:hover, .file-drop.drag {
+      border-color: var(--primary);
+      background: var(--primary-bg);
+    }
+    .file-drop .big { font-size: 34px; display: block; margin-bottom: 8px; }
+    .report-result {
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      line-height: 1.9;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+    }
+    .report-result h1, .report-result h2, .report-result h3, .report-result h4 { margin: 14px 0 8px; font-size: 16px; }
+    .report-result h2 { font-size: 17px; }
+    .report-result h3 { font-size: 15px; }
+    .report-result ul, .report-result ol { padding-left: 22px; margin: 6px 0; }
+    .report-result code { background: var(--primary-bg); }
+    .report-result blockquote { border-left: 3px solid var(--primary); padding-left: 12px; color: var(--muted); margin: 8px 0; }
+    .report-result hr { border: none; border-top: 1px solid var(--border-light); margin: 12px 0; }
+    .status-line { color: var(--muted); font-size: 13px; }
+    .spin-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); margin-right: 8px; animation: pulse 1s infinite; vertical-align: middle; }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1);} 50% { opacity: .35; transform: scale(.8);} }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="logo">🐞</span>
+      <span>梦之韵错误报告 <small>上传日志 · AI 智能分析</small></span>
+    </div>
+    <div class="topbar-actions">
+      <a href="/ticket.html" class="btn btn-sm">🎫 提交工单</a>
+      <a href="/" class="btn btn-sm">返回下载页</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="hero" style="padding-bottom:16px;">
+      <div class="ver-badge" style="font-size:38px;">错误报告分析</div>
+      <div class="sub">上传你的 <code>logs/</code> 文件夹或崩溃报告（打包成 <code>.zip</code>），AI 会帮你分析崩溃原因并给出解决方案，结果会发送到你的邮箱。</div>
+    </div>
+
+    <div class="card">
+      <h2>📤 上传错误报告</h2>
+      <form id="reportForm" style="display:flex; flex-direction:column; gap:18px;">
+        <div>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">用户邮箱（用于接收验证码与分析结果）</label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input class="input" id="email" type="email" placeholder="you@example.com" style="flex:1; min-width:180px;" required>
+            <button type="button" id="sendCodeBtn" class="btn btn-primary" style="min-width:150px;">发送验证码</button>
+          </div>
+          <p id="emailStatus" hidden style="font-size:12px; margin-top:8px;"></p>
+          <p style="color:var(--muted); font-size:12px; margin-top:6px;">邮箱只需验证一次，之后上传无需再输入验证码。</p>
+        </div>
+        <div id="codeRow" hidden>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">邮箱验证码（请在 10 分钟内输入）</label>
+          <input class="input" id="code" maxlength="6" inputmode="numeric" placeholder="6 位验证码"
+                 style="text-align:center; font-size:24px; letter-spacing:8px;" required>
+          <p style="color:var(--muted); font-size:12px; margin-top:8px;">验证码已发送到 <b style="color:var(--pink-dark)" id="verifyEmail"></b>，用于确认邮箱真实有效。没收到？请检查垃圾邮件箱。</p>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">简称</label>
+            <input class="input" id="nickname" maxlength="20" placeholder="例如：小明">
+          </div>
+          <div>
+            <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">游戏名</label>
+            <input class="input" id="gamename" maxlength="40" placeholder="你的游戏内名称">
+          </div>
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">问题描述（可选）</label>
+          <textarea class="input" id="description" rows="3" maxlength="2000" placeholder="简单描述一下遇到的问题，例如：加载世界时崩溃…" style="resize:vertical;"></textarea>
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; color:var(--muted); margin-bottom:6px;">错误报告压缩包（<code>.zip</code>，最大 20MB）</label>
+          <div class="file-drop" id="dropZone">
+            <span class="big">📦</span>
+            <span id="dropText">点击选择或拖拽 <code>.zip</code> 文件到此处</span>
+          </div>
+          <input type="file" id="file" accept=".zip" style="display:none;">
+        </div>
+        <button type="submit" id="submitBtn" class="btn btn-primary big-btn" style="width:100%;">上传并开始分析</button>
+        <p style="color:var(--muted); font-size:12px; text-align:center;">建议只打包 <code>logs</code> 文件夹与 <code>crash-reports</code> 文件夹；请勿包含存档、账户等隐私文件。</p>
+      </form>
+    </div>
+
+    <div id="resultBox" class="card" hidden style="margin-top:26px;">
+      <h2 id="resultTitle">⏳ 正在分析</h2>
+      <div class="status-line" id="statusLine"></div>
+      <div id="resultBody" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="/js/error-report.js"></script>
+</body>
+</html>

@@ -1,6 +1,14 @@
-// esbuild keepNames helper（首次打包时被剥离，手动补回，必须返回 target）
-var __name = /* @__PURE__ */ (target, value) => Object.defineProperty(target, "name", { value, configurable: true });
-// src/github.js
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
+// src/index.js
+var __defProp2 = Object.defineProperty;
+var __name2 = /* @__PURE__ */ __name((target, value) => __defProp2(target, "name", { value, configurable: true }), "__name");
+var __defProp22 = Object.defineProperty;
+var __name22 = /* @__PURE__ */ __name2((target, value) => __defProp22(target, "name", { value, configurable: true }), "__name");
+var __defProp222 = Object.defineProperty;
+var __name222 = /* @__PURE__ */ __name22((target, value) => __defProp222(target, "name", { value, configurable: true }), "__name");
+var __name2222 = /* @__PURE__ */ __name222((target, value) => Object.defineProperty(target, "name", { value, configurable: true }), "__name");
 var API = "https://api.github.com";
 function headers(env, token) {
   return {
@@ -11,10 +19,18 @@ function headers(env, token) {
   };
 }
 __name(headers, "headers");
+__name2(headers, "headers");
+__name22(headers, "headers");
+__name222(headers, "headers");
+__name2222(headers, "headers");
 function repoPath(env) {
   return `/repos/${env.REPO_OWNER}/${env.REPO_NAME}`;
 }
 __name(repoPath, "repoPath");
+__name2(repoPath, "repoPath");
+__name22(repoPath, "repoPath");
+__name222(repoPath, "repoPath");
+__name2222(repoPath, "repoPath");
 async function parse(res) {
   const text2 = await res.text();
   let data = null;
@@ -32,10 +48,18 @@ async function parse(res) {
   return data;
 }
 __name(parse, "parse");
+__name2(parse, "parse");
+__name22(parse, "parse");
+__name222(parse, "parse");
+__name2222(parse, "parse");
 async function getUser(env, token) {
   return parse(await fetch(`${API}/user`, { headers: headers(env, token) }));
 }
 __name(getUser, "getUser");
+__name2(getUser, "getUser");
+__name22(getUser, "getUser");
+__name222(getUser, "getUser");
+__name2222(getUser, "getUser");
 async function getLatestRelease(env) {
   try {
     return await parse(await fetch(`${API}${repoPath(env)}/releases/latest`, { headers: headers(env) }));
@@ -45,10 +69,18 @@ async function getLatestRelease(env) {
   }
 }
 __name(getLatestRelease, "getLatestRelease");
+__name2(getLatestRelease, "getLatestRelease");
+__name22(getLatestRelease, "getLatestRelease");
+__name222(getLatestRelease, "getLatestRelease");
+__name2222(getLatestRelease, "getLatestRelease");
 async function listReleases(env) {
   return parse(await fetch(`${API}${repoPath(env)}/releases?per_page=20`, { headers: headers(env) }));
 }
 __name(listReleases, "listReleases");
+__name2(listReleases, "listReleases");
+__name22(listReleases, "listReleases");
+__name222(listReleases, "listReleases");
+__name2222(listReleases, "listReleases");
 async function createRelease(env, tagName, name, body) {
   return parse(await fetch(`${API}${repoPath(env)}/releases`, {
     method: "POST",
@@ -57,6 +89,10 @@ async function createRelease(env, tagName, name, body) {
   }));
 }
 __name(createRelease, "createRelease");
+__name2(createRelease, "createRelease");
+__name22(createRelease, "createRelease");
+__name222(createRelease, "createRelease");
+__name2222(createRelease, "createRelease");
 async function uploadAsset(env, releaseId, data, assetName, contentType = "application/zip") {
   const url = `https://uploads.github.com${repoPath(env)}/releases/${releaseId}/assets?name=${encodeURIComponent(assetName)}`;
   const res = await fetch(url, {
@@ -67,14 +103,26 @@ async function uploadAsset(env, releaseId, data, assetName, contentType = "appli
   return parse(res);
 }
 __name(uploadAsset, "uploadAsset");
+__name2(uploadAsset, "uploadAsset");
+__name22(uploadAsset, "uploadAsset");
+__name222(uploadAsset, "uploadAsset");
+__name2222(uploadAsset, "uploadAsset");
 async function deleteRelease(env, releaseId) {
   return parse(await fetch(`${API}${repoPath(env)}/releases/${releaseId}`, { method: "DELETE", headers: headers(env) }));
 }
 __name(deleteRelease, "deleteRelease");
+__name2(deleteRelease, "deleteRelease");
+__name22(deleteRelease, "deleteRelease");
+__name222(deleteRelease, "deleteRelease");
+__name2222(deleteRelease, "deleteRelease");
 async function getRelease(env, id) {
   return parse(await fetch(`${API}${repoPath(env)}/releases/${id}`, { headers: headers(env) }));
 }
 __name(getRelease, "getRelease");
+__name2(getRelease, "getRelease");
+__name22(getRelease, "getRelease");
+__name222(getRelease, "getRelease");
+__name2222(getRelease, "getRelease");
 async function getReleaseAsset(env, assetId) {
   const res = await fetch(`${API}${repoPath(env)}/releases/assets/${assetId}`, {
     headers: { ...headers(env), Accept: "application/octet-stream" }
@@ -87,18 +135,34 @@ async function getReleaseAsset(env, assetId) {
   return new Uint8Array(await res.arrayBuffer());
 }
 __name(getReleaseAsset, "getReleaseAsset");
+__name2(getReleaseAsset, "getReleaseAsset");
+__name22(getReleaseAsset, "getReleaseAsset");
+__name222(getReleaseAsset, "getReleaseAsset");
+__name2222(getReleaseAsset, "getReleaseAsset");
 async function deleteTag(env, tag) {
   return parse(await fetch(`${API}${repoPath(env)}/git/refs/tags/${encodeURIComponent(tag)}`, { method: "DELETE", headers: headers(env) }));
 }
 __name(deleteTag, "deleteTag");
+__name2(deleteTag, "deleteTag");
+__name22(deleteTag, "deleteTag");
+__name222(deleteTag, "deleteTag");
+__name2222(deleteTag, "deleteTag");
 function repoBranch(env) {
   return env.REPO_BRANCH || "main";
 }
 __name(repoBranch, "repoBranch");
+__name2(repoBranch, "repoBranch");
+__name22(repoBranch, "repoBranch");
+__name222(repoBranch, "repoBranch");
+__name2222(repoBranch, "repoBranch");
 function encPath(path) {
   return path.split("/").map(encodeURIComponent).join("/");
 }
 __name(encPath, "encPath");
+__name2(encPath, "encPath");
+__name22(encPath, "encPath");
+__name222(encPath, "encPath");
+__name2222(encPath, "encPath");
 async function fileMeta(env, path) {
   try {
     return await parse(await fetch(`${API}${repoPath(env)}/contents/${encPath(path)}`, { headers: headers(env) }));
@@ -108,6 +172,10 @@ async function fileMeta(env, path) {
   }
 }
 __name(fileMeta, "fileMeta");
+__name2(fileMeta, "fileMeta");
+__name22(fileMeta, "fileMeta");
+__name222(fileMeta, "fileMeta");
+__name2222(fileMeta, "fileMeta");
 async function listRepoDir(env, dir) {
   const meta = await fileMeta(env, dir);
   if (!meta) return [];
@@ -115,6 +183,10 @@ async function listRepoDir(env, dir) {
   return [];
 }
 __name(listRepoDir, "listRepoDir");
+__name2(listRepoDir, "listRepoDir");
+__name22(listRepoDir, "listRepoDir");
+__name222(listRepoDir, "listRepoDir");
+__name2222(listRepoDir, "listRepoDir");
 async function readRepoFile(env, path) {
   const res = await fetch(`${API}${repoPath(env)}/contents/${encPath(path)}`, {
     headers: { ...headers(env), Accept: "application/vnd.github.raw+json" }
@@ -127,6 +199,10 @@ async function readRepoFile(env, path) {
   return new Uint8Array(await res.arrayBuffer());
 }
 __name(readRepoFile, "readRepoFile");
+__name2(readRepoFile, "readRepoFile");
+__name22(readRepoFile, "readRepoFile");
+__name222(readRepoFile, "readRepoFile");
+__name2222(readRepoFile, "readRepoFile");
 async function writeRepoFile(env, path, data, message) {
   const existing = await fileMeta(env, path);
   const body = { message, content: bytesToBase64(data), branch: repoBranch(env) };
@@ -138,6 +214,10 @@ async function writeRepoFile(env, path, data, message) {
   }));
 }
 __name(writeRepoFile, "writeRepoFile");
+__name2(writeRepoFile, "writeRepoFile");
+__name22(writeRepoFile, "writeRepoFile");
+__name222(writeRepoFile, "writeRepoFile");
+__name2222(writeRepoFile, "writeRepoFile");
 async function deleteRepoFile(env, path, message) {
   const meta = await fileMeta(env, path);
   if (!meta) return null;
@@ -148,6 +228,10 @@ async function deleteRepoFile(env, path, message) {
   }));
 }
 __name(deleteRepoFile, "deleteRepoFile");
+__name2(deleteRepoFile, "deleteRepoFile");
+__name22(deleteRepoFile, "deleteRepoFile");
+__name222(deleteRepoFile, "deleteRepoFile");
+__name2222(deleteRepoFile, "deleteRepoFile");
 function bytesToBase64(bytes) {
   let binary = "";
   const CHUNK = 32768;
@@ -157,8 +241,10 @@ function bytesToBase64(bytes) {
   return btoa(binary);
 }
 __name(bytesToBase64, "bytesToBase64");
-
-// src/store.js
+__name2(bytesToBase64, "bytesToBase64");
+__name22(bytesToBase64, "bytesToBase64");
+__name222(bytesToBase64, "bytesToBase64");
+__name2222(bytesToBase64, "bytesToBase64");
 var STATE_KEY = "state";
 var MODS_DIR = "mods";
 var UPDATER_PATH = "updater/mod-updater.exe";
@@ -166,6 +252,10 @@ function defaultState() {
   return { currentVersion: "1.0.0", lastPublishAt: null, lastReleaseId: null, lastReleaseTag: null };
 }
 __name(defaultState, "defaultState");
+__name2(defaultState, "defaultState");
+__name22(defaultState, "defaultState");
+__name222(defaultState, "defaultState");
+__name2222(defaultState, "defaultState");
 async function readState(env) {
   const raw = await env.MODS_KV.get(STATE_KEY);
   if (!raw) return defaultState();
@@ -176,10 +266,18 @@ async function readState(env) {
   }
 }
 __name(readState, "readState");
+__name2(readState, "readState");
+__name22(readState, "readState");
+__name222(readState, "readState");
+__name2222(readState, "readState");
 async function writeState(env, state) {
   await env.MODS_KV.put(STATE_KEY, JSON.stringify(state));
 }
 __name(writeState, "writeState");
+__name2(writeState, "writeState");
+__name22(writeState, "writeState");
+__name222(writeState, "writeState");
+__name2222(writeState, "writeState");
 function bumpVersion(v) {
   const parts = String(v || "1.0.0").split(".").map((n) => parseInt(n, 10) || 0);
   while (parts.length < 3) parts.push(0);
@@ -187,11 +285,19 @@ function bumpVersion(v) {
   return parts.join(".");
 }
 __name(bumpVersion, "bumpVersion");
+__name2(bumpVersion, "bumpVersion");
+__name22(bumpVersion, "bumpVersion");
+__name222(bumpVersion, "bumpVersion");
+__name2222(bumpVersion, "bumpVersion");
 async function listMods(env) {
   const entries = await listRepoDir(env, MODS_DIR);
   return entries.filter((e) => e.name.toLowerCase().endsWith(".jar")).map((e) => ({ name: e.name, size: e.size, mtime: null }));
 }
 __name(listMods, "listMods");
+__name2(listMods, "listMods");
+__name22(listMods, "listMods");
+__name222(listMods, "listMods");
+__name2222(listMods, "listMods");
 async function putMod(env, name, data, size) {
   const toR2 = new Uint8Array(data.slice(0));
   const toGit = new Uint8Array(data.slice(0));
@@ -206,16 +312,28 @@ async function putMod(env, name, data, size) {
   return { name, size, mtime: null };
 }
 __name(putMod, "putMod");
+__name2(putMod, "putMod");
+__name22(putMod, "putMod");
+__name222(putMod, "putMod");
+__name2222(putMod, "putMod");
 async function removeMod(env, name) {
   await deleteRepoFile(env, `${MODS_DIR}/${name}`, `\u5220\u9664\u6A21\u7EC4 ${name}`);
 }
 __name(removeMod, "removeMod");
+__name2(removeMod, "removeMod");
+__name22(removeMod, "removeMod");
+__name222(removeMod, "removeMod");
+__name2222(removeMod, "removeMod");
 async function renameMod(env, oldName, newName) {
   const raw = await readRepoFile(env, `${MODS_DIR}/${oldName}`);
   await writeRepoFile(env, `${MODS_DIR}/${newName}`, raw, `\u91CD\u547D\u540D\u6A21\u7EC4 ${oldName} \u2192 ${newName}`);
   await deleteRepoFile(env, `${MODS_DIR}/${oldName}`, `\u91CD\u547D\u540D\u6A21\u7EC4 ${oldName} \u2192 ${newName}`);
 }
 __name(renameMod, "renameMod");
+__name2(renameMod, "renameMod");
+__name22(renameMod, "renameMod");
+__name222(renameMod, "renameMod");
+__name2222(renameMod, "renameMod");
 async function readUpdater(env) {
   try {
     return await readRepoFile(env, UPDATER_PATH);
@@ -225,15 +343,23 @@ async function readUpdater(env) {
   }
 }
 __name(readUpdater, "readUpdater");
+__name2(readUpdater, "readUpdater");
+__name22(readUpdater, "readUpdater");
+__name222(readUpdater, "readUpdater");
+__name2222(readUpdater, "readUpdater");
 async function createSession(env, user) {
-  const rnd = /* @__PURE__ */ __name(() => crypto.randomUUID().replace(/-/g, ""), "rnd");
+  const rnd = /* @__PURE__ */ __name2222(() => crypto.randomUUID().replace(/-/g, ""), "rnd");
   const token = rnd() + rnd();
   const ttlHours = parseInt(env.SESSION_TTL_HOURS || "168", 10);
-  const session = { login: user.login, name: user.name || user.login, avatar_url: user.avatar_url };
+  const session = { login: user.login, name: user.name || user.login, role: user.role || null, avatar_url: user.avatar_url };
   await env.MODS_KV.put(`session:${token}`, JSON.stringify(session), { expirationTtl: ttlHours * 3600 });
   return token;
 }
 __name(createSession, "createSession");
+__name2(createSession, "createSession");
+__name22(createSession, "createSession");
+__name222(createSession, "createSession");
+__name2222(createSession, "createSession");
 async function getSession(env, token) {
   if (!token) return null;
   const raw = await env.MODS_KV.get(`session:${token}`);
@@ -245,12 +371,138 @@ async function getSession(env, token) {
   }
 }
 __name(getSession, "getSession");
+__name2(getSession, "getSession");
+__name22(getSession, "getSession");
+__name222(getSession, "getSession");
+__name2222(getSession, "getSession");
 async function deleteSession(env, token) {
   if (token) await env.MODS_KV.delete(`session:${token}`);
 }
 __name(deleteSession, "deleteSession");
-
-// node_modules/fflate/esm/browser.js
+__name2(deleteSession, "deleteSession");
+__name22(deleteSession, "deleteSession");
+__name222(deleteSession, "deleteSession");
+__name2222(deleteSession, "deleteSession");
+var ADMIN_USERS_KEY = "admin:users";
+var ROLE_SUPER = "superadmin";
+var ROLE_ADMIN = "admin";
+function bytesToB64(u8arr) {
+  let bin = "";
+  for (let i2 = 0; i2 < u8arr.length; i2++) bin += String.fromCharCode(u8arr[i2]);
+  return btoa(bin);
+}
+__name(bytesToB64, "bytesToB64");
+__name2(bytesToB64, "bytesToB64");
+__name22(bytesToB64, "bytesToB64");
+__name222(bytesToB64, "bytesToB64");
+__name2222(bytesToB64, "bytesToB64");
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i2 = 0; i2 < bin.length; i2++) out[i2] = bin.charCodeAt(i2);
+  return out;
+}
+__name(b64ToBytes, "b64ToBytes");
+__name2(b64ToBytes, "b64ToBytes");
+__name22(b64ToBytes, "b64ToBytes");
+__name222(b64ToBytes, "b64ToBytes");
+__name2222(b64ToBytes, "b64ToBytes");
+async function hashPassword(password) {
+  const iterations = 1e5;
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits2 = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations }, key, 256);
+  return `pbkdf2$${iterations}$${bytesToB64(salt)}$${bytesToB64(new Uint8Array(bits2))}`;
+}
+__name(hashPassword, "hashPassword");
+__name2(hashPassword, "hashPassword");
+__name22(hashPassword, "hashPassword");
+__name222(hashPassword, "hashPassword");
+__name2222(hashPassword, "hashPassword");
+async function verifyPassword(password, stored) {
+  try {
+    const parts = String(stored || "").split("$");
+    if (parts.length !== 4 || parts[0] !== "pbkdf2") return false;
+    const iterations = parseInt(parts[1], 10) || 1e5;
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits2 = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", hash: "SHA-256", salt: b64ToBytes(parts[2]), iterations },
+      key,
+      256
+    );
+    return bytesToB64(new Uint8Array(bits2)) === parts[3];
+  } catch (_) {
+    return false;
+  }
+}
+__name(verifyPassword, "verifyPassword");
+__name2(verifyPassword, "verifyPassword");
+__name22(verifyPassword, "verifyPassword");
+__name222(verifyPassword, "verifyPassword");
+__name2222(verifyPassword, "verifyPassword");
+async function readAdminUsers(env) {
+  const raw = await env.MODS_KV.get(ADMIN_USERS_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (_) {
+    return null;
+  }
+}
+__name(readAdminUsers, "readAdminUsers");
+__name2(readAdminUsers, "readAdminUsers");
+__name22(readAdminUsers, "readAdminUsers");
+__name222(readAdminUsers, "readAdminUsers");
+__name2222(readAdminUsers, "readAdminUsers");
+async function writeAdminUsers(env, users) {
+  await env.MODS_KV.put(ADMIN_USERS_KEY, JSON.stringify(users));
+}
+__name(writeAdminUsers, "writeAdminUsers");
+__name2(writeAdminUsers, "writeAdminUsers");
+__name22(writeAdminUsers, "writeAdminUsers");
+__name222(writeAdminUsers, "writeAdminUsers");
+__name2222(writeAdminUsers, "writeAdminUsers");
+async function ensureAdminUsers(env) {
+  const users = await readAdminUsers(env);
+  if (users && Object.keys(users).length) return users;
+  const initPass = env.ADMIN_INIT_PASSWORD || "admin123";
+  const next = {
+    maoxinhe: {
+      name: "maoxinhe",
+      role: ROLE_SUPER,
+      passwordHash: await hashPassword(initPass),
+      createdAt: (/* @__PURE__ */ new Date()).toISOString()
+    }
+  };
+  await writeAdminUsers(env, next);
+  return next;
+}
+__name(ensureAdminUsers, "ensureAdminUsers");
+__name2(ensureAdminUsers, "ensureAdminUsers");
+__name22(ensureAdminUsers, "ensureAdminUsers");
+__name222(ensureAdminUsers, "ensureAdminUsers");
+__name2222(ensureAdminUsers, "ensureAdminUsers");
+async function getAdminUser(env, login) {
+  const users = await ensureAdminUsers(env);
+  return users[login] || null;
+}
+__name(getAdminUser, "getAdminUser");
+__name2(getAdminUser, "getAdminUser");
+__name22(getAdminUser, "getAdminUser");
+__name222(getAdminUser, "getAdminUser");
+__name2222(getAdminUser, "getAdminUser");
+async function getAdminRole(env, login) {
+  if (!login) return null;
+  const users = await ensureAdminUsers(env);
+  if (users[login]) return users[login].role;
+  if (env.ADMIN_LOGIN && login === env.ADMIN_LOGIN) return ROLE_SUPER;
+  return null;
+}
+__name(getAdminRole, "getAdminRole");
+__name2(getAdminRole, "getAdminRole");
+__name22(getAdminRole, "getAdminRole");
+__name222(getAdminRole, "getAdminRole");
+__name2222(getAdminRole, "getAdminRole");
 var u8 = Uint8Array;
 var u16 = Uint16Array;
 var i32 = Int32Array;
@@ -326,7 +578,7 @@ var fdeb = new u8([
   0
 ]);
 var clim = new u8([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
-var freb = /* @__PURE__ */ __name(function(eb, start) {
+var freb = /* @__PURE__ */ __name2222(function(eb, start) {
   var b = new u16(31);
   for (var i2 = 0; i2 < 31; ++i2) {
     b[i2] = start += 1 << eb[i2 - 1];
@@ -355,7 +607,7 @@ for (i = 0; i < 32768; ++i) {
 }
 var x;
 var i;
-var hMap = /* @__PURE__ */ __name((function(cd, mb, r) {
+var hMap = /* @__PURE__ */ __name2222((function(cd, mb, r) {
   var s = cd.length;
   var i2 = 0;
   var l = new u16(mb);
@@ -412,7 +664,7 @@ var flm = /* @__PURE__ */ hMap(flt, 9, 0);
 var flrm = /* @__PURE__ */ hMap(flt, 9, 1);
 var fdm = /* @__PURE__ */ hMap(fdt, 5, 0);
 var fdrm = /* @__PURE__ */ hMap(fdt, 5, 1);
-var max = /* @__PURE__ */ __name(function(a) {
+var max = /* @__PURE__ */ __name2222(function(a) {
   var m = a[0];
   for (var i2 = 1; i2 < a.length; ++i2) {
     if (a[i2] > m)
@@ -420,18 +672,18 @@ var max = /* @__PURE__ */ __name(function(a) {
   }
   return m;
 }, "max");
-var bits = /* @__PURE__ */ __name(function(d, p, m) {
+var bits = /* @__PURE__ */ __name2222(function(d, p, m) {
   var o = p / 8 | 0;
   return (d[o] | d[o + 1] << 8) >> (p & 7) & m;
 }, "bits");
-var bits16 = /* @__PURE__ */ __name(function(d, p) {
+var bits16 = /* @__PURE__ */ __name2222(function(d, p) {
   var o = p / 8 | 0;
   return (d[o] | d[o + 1] << 8 | d[o + 2] << 16) >> (p & 7);
 }, "bits16");
-var shft = /* @__PURE__ */ __name(function(p) {
+var shft = /* @__PURE__ */ __name2222(function(p) {
   return (p + 7) / 8 | 0;
 }, "shft");
-var slc = /* @__PURE__ */ __name(function(v, s, e) {
+var slc = /* @__PURE__ */ __name2222(function(v, s, e) {
   if (s == null || s < 0)
     s = 0;
   if (e == null || e > v.length)
@@ -456,7 +708,7 @@ var ec = [
   "invalid zip data"
   // determined by unknown compression method
 ];
-var err = /* @__PURE__ */ __name(function(ind, msg, nt) {
+var err = /* @__PURE__ */ __name2222(function(ind, msg, nt) {
   var e = new Error(msg || ec[ind]);
   e.code = ind;
   if (Error.captureStackTrace)
@@ -465,7 +717,7 @@ var err = /* @__PURE__ */ __name(function(ind, msg, nt) {
     throw e;
   return e;
 }, "err");
-var inflt = /* @__PURE__ */ __name(function(dat, st, buf, dict) {
+var inflt = /* @__PURE__ */ __name2222(function(dat, st, buf, dict) {
   var sl = dat.length, dl = dict ? dict.length : 0;
   if (!sl || st.f && !st.l)
     return buf || new u8(0);
@@ -474,7 +726,7 @@ var inflt = /* @__PURE__ */ __name(function(dat, st, buf, dict) {
   var noSt = st.i;
   if (noBuf)
     buf = new u8(sl * 3);
-  var cbuf = /* @__PURE__ */ __name(function(l2) {
+  var cbuf = /* @__PURE__ */ __name2222(function(l2) {
     var bl = buf.length;
     if (l2 > bl) {
       var nbuf = new u8(Math.max(bl * 2, l2));
@@ -606,20 +858,20 @@ var inflt = /* @__PURE__ */ __name(function(dat, st, buf, dict) {
   } while (!final);
   return bt != buf.length && noBuf ? slc(buf, 0, bt) : buf.subarray(0, bt);
 }, "inflt");
-var wbits = /* @__PURE__ */ __name(function(d, p, v) {
+var wbits = /* @__PURE__ */ __name2222(function(d, p, v) {
   v <<= p & 7;
   var o = p / 8 | 0;
   d[o] |= v;
   d[o + 1] |= v >> 8;
 }, "wbits");
-var wbits16 = /* @__PURE__ */ __name(function(d, p, v) {
+var wbits16 = /* @__PURE__ */ __name2222(function(d, p, v) {
   v <<= p & 7;
   var o = p / 8 | 0;
   d[o] |= v;
   d[o + 1] |= v >> 8;
   d[o + 2] |= v >> 16;
 }, "wbits16");
-var hTree = /* @__PURE__ */ __name(function(d, mb) {
+var hTree = /* @__PURE__ */ __name2222(function(d, mb) {
   var t = [];
   for (var i2 = 0; i2 < d.length; ++i2) {
     if (d[i2])
@@ -685,16 +937,16 @@ var hTree = /* @__PURE__ */ __name(function(d, mb) {
   }
   return { t: new u8(tr), l: mbt };
 }, "hTree");
-var ln = /* @__PURE__ */ __name(function(n, l, d) {
+var ln = /* @__PURE__ */ __name2222(function(n, l, d) {
   return n.s == -1 ? Math.max(ln(n.l, l, d + 1), ln(n.r, l, d + 1)) : l[n.s] = d;
 }, "ln");
-var lc = /* @__PURE__ */ __name(function(c) {
+var lc = /* @__PURE__ */ __name2222(function(c) {
   var s = c.length;
   while (s && !c[--s])
     ;
   var cl = new u16(++s);
   var cli = 0, cln = c[0], cls = 1;
-  var w = /* @__PURE__ */ __name(function(v) {
+  var w = /* @__PURE__ */ __name2222(function(v) {
     cl[cli++] = v;
   }, "w");
   for (var i2 = 1; i2 <= s; ++i2) {
@@ -723,13 +975,13 @@ var lc = /* @__PURE__ */ __name(function(c) {
   }
   return { c: cl.subarray(0, cli), n: s };
 }, "lc");
-var clen = /* @__PURE__ */ __name(function(cf, cl) {
+var clen = /* @__PURE__ */ __name2222(function(cf, cl) {
   var l = 0;
   for (var i2 = 0; i2 < cl.length; ++i2)
     l += cf[i2] * cl[i2];
   return l;
 }, "clen");
-var wfblk = /* @__PURE__ */ __name(function(out, pos, dat) {
+var wfblk = /* @__PURE__ */ __name2222(function(out, pos, dat) {
   var s = dat.length;
   var o = shft(pos + 2);
   out[o] = s & 255;
@@ -740,7 +992,7 @@ var wfblk = /* @__PURE__ */ __name(function(out, pos, dat) {
     out[o + i2 + 4] = dat[i2];
   return (o + 4 + s) * 8;
 }, "wfblk");
-var wblk = /* @__PURE__ */ __name(function(dat, out, final, syms, lf, df, eb, li, bs, bl, p) {
+var wblk = /* @__PURE__ */ __name2222(function(dat, out, final, syms, lf, df, eb, li, bs, bl, p) {
   wbits(out, p++, final);
   ++lf[256];
   var _a2 = hTree(lf, 15), dlt = _a2.t, mlb = _a2.l;
@@ -806,7 +1058,7 @@ var wblk = /* @__PURE__ */ __name(function(dat, out, final, syms, lf, df, eb, li
 }, "wblk");
 var deo = /* @__PURE__ */ new i32([65540, 131080, 131088, 131104, 262176, 1048704, 1048832, 2114560, 2117632]);
 var et = /* @__PURE__ */ new u8(0);
-var dflt = /* @__PURE__ */ __name(function(dat, lvl, plvl, pre, post, st) {
+var dflt = /* @__PURE__ */ __name2222(function(dat, lvl, plvl, pre, post, st) {
   var s = st.z || dat.length;
   var o = new u8(pre + s + 5 * (1 + Math.ceil(s / 7e3)) + post);
   var w = o.subarray(pre, o.length - post);
@@ -820,7 +1072,7 @@ var dflt = /* @__PURE__ */ __name(function(dat, lvl, plvl, pre, post, st) {
     var msk_1 = (1 << plvl) - 1;
     var prev = st.p || new u16(32768), head = st.h || new u16(msk_1 + 1);
     var bs1_1 = Math.ceil(plvl / 3), bs2_1 = 2 * bs1_1;
-    var hsh = /* @__PURE__ */ __name(function(i3) {
+    var hsh = /* @__PURE__ */ __name2222(function(i3) {
       return (dat[i3] ^ dat[i3 + 1] << bs1_1 ^ dat[i3 + 2] << bs2_1) & msk_1;
     }, "hsh");
     var syms = new i32(25e3);
@@ -917,21 +1169,21 @@ var crct = /* @__PURE__ */ (function() {
   }
   return t;
 })();
-var crc = /* @__PURE__ */ __name(function() {
+var crc = /* @__PURE__ */ __name2222(function() {
   var c = -1;
   return {
-    p: /* @__PURE__ */ __name(function(d) {
+    p: /* @__PURE__ */ __name2222(function(d) {
       var cr = c;
       for (var i2 = 0; i2 < d.length; ++i2)
         cr = crct[cr & 255 ^ d[i2]] ^ cr >>> 8;
       c = cr;
     }, "p"),
-    d: /* @__PURE__ */ __name(function() {
+    d: /* @__PURE__ */ __name2222(function() {
       return ~c;
     }, "d")
   };
 }, "crc");
-var dopt = /* @__PURE__ */ __name(function(dat, opt, pre, post, st) {
+var dopt = /* @__PURE__ */ __name2222(function(dat, opt, pre, post, st) {
   if (!st) {
     st = { l: 1 };
     if (opt.dictionary) {
@@ -945,7 +1197,7 @@ var dopt = /* @__PURE__ */ __name(function(dat, opt, pre, post, st) {
   }
   return dflt(dat, opt.level == null ? 6 : opt.level, opt.mem == null ? st.l ? Math.ceil(Math.max(8, Math.min(13, Math.log(dat.length))) * 1.5) : 20 : 12 + opt.mem, pre, post, st);
 }, "dopt");
-var mrg = /* @__PURE__ */ __name(function(a, b) {
+var mrg = /* @__PURE__ */ __name2222(function(a, b) {
   var o = {};
   for (var k in a)
     o[k] = a[k];
@@ -953,16 +1205,16 @@ var mrg = /* @__PURE__ */ __name(function(a, b) {
     o[k] = b[k];
   return o;
 }, "mrg");
-var b2 = /* @__PURE__ */ __name(function(d, b) {
+var b2 = /* @__PURE__ */ __name2222(function(d, b) {
   return d[b] | d[b + 1] << 8;
 }, "b2");
-var b4 = /* @__PURE__ */ __name(function(d, b) {
+var b4 = /* @__PURE__ */ __name2222(function(d, b) {
   return (d[b] | d[b + 1] << 8 | d[b + 2] << 16 | d[b + 3] << 24) >>> 0;
 }, "b4");
-var b8 = /* @__PURE__ */ __name(function(d, b) {
+var b8 = /* @__PURE__ */ __name2222(function(d, b) {
   return b4(d, b) + b4(d, b + 4) * 4294967296;
 }, "b8");
-var wbytes = /* @__PURE__ */ __name(function(d, b, v) {
+var wbytes = /* @__PURE__ */ __name2222(function(d, b, v) {
   for (; v; ++b)
     d[b] = v, v >>>= 8;
 }, "wbytes");
@@ -970,11 +1222,19 @@ function deflateSync(data, opts) {
   return dopt(data, opts || {}, 0, 0);
 }
 __name(deflateSync, "deflateSync");
+__name2(deflateSync, "deflateSync");
+__name22(deflateSync, "deflateSync");
+__name222(deflateSync, "deflateSync");
+__name2222(deflateSync, "deflateSync");
 function inflateSync(data, opts) {
   return inflt(data, { i: 2 }, opts && opts.out, opts && opts.dictionary);
 }
 __name(inflateSync, "inflateSync");
-var fltn = /* @__PURE__ */ __name(function(d, p, t, o) {
+__name2(inflateSync, "inflateSync");
+__name22(inflateSync, "inflateSync");
+__name222(inflateSync, "inflateSync");
+__name2222(inflateSync, "inflateSync");
+var fltn = /* @__PURE__ */ __name2222(function(d, p, t, o) {
   for (var k in d) {
     var val = d[k], n = p + k, op = o;
     if (Array.isArray(val))
@@ -995,7 +1255,7 @@ try {
   tds = 1;
 } catch (e) {
 }
-var dutf8 = /* @__PURE__ */ __name(function(d) {
+var dutf8 = /* @__PURE__ */ __name2222(function(d) {
   for (var r = "", i2 = 0; ; ) {
     var c = d[i2++];
     var eb = (c > 127) + (c > 223) + (c > 239);
@@ -1023,7 +1283,7 @@ function strToU8(str, latin1) {
   var l = str.length;
   var ar = new u8(str.length + (str.length >> 1));
   var ai = 0;
-  var w = /* @__PURE__ */ __name(function(v) {
+  var w = /* @__PURE__ */ __name2222(function(v) {
     ar[ai++] = v;
   }, "w");
   for (var i2 = 0; i2 < l; ++i2) {
@@ -1045,6 +1305,10 @@ function strToU8(str, latin1) {
   return slc(ar, 0, ai);
 }
 __name(strToU8, "strToU8");
+__name2(strToU8, "strToU8");
+__name22(strToU8, "strToU8");
+__name222(strToU8, "strToU8");
+__name2222(strToU8, "strToU8");
 function strFromU8(dat, latin1) {
   if (latin1) {
     var r = "";
@@ -1061,15 +1325,19 @@ function strFromU8(dat, latin1) {
   }
 }
 __name(strFromU8, "strFromU8");
-var slzh = /* @__PURE__ */ __name(function(d, b) {
+__name2(strFromU8, "strFromU8");
+__name22(strFromU8, "strFromU8");
+__name222(strFromU8, "strFromU8");
+__name2222(strFromU8, "strFromU8");
+var slzh = /* @__PURE__ */ __name2222(function(d, b) {
   return b + 30 + b2(d, b + 26) + b2(d, b + 28);
 }, "slzh");
-var zh = /* @__PURE__ */ __name(function(d, b, z) {
+var zh = /* @__PURE__ */ __name2222(function(d, b, z) {
   var fnl = b2(d, b + 28), efl = b2(d, b + 30), fn = strFromU8(d.subarray(b + 46, b + 46 + fnl), !(b2(d, b + 8) & 2048)), es = b + 46 + fnl;
   var _a2 = z64hs(d, es, efl, z, b4(d, b + 20), b4(d, b + 24), b4(d, b + 42)), sc = _a2[0], su = _a2[1], off = _a2[2];
   return [b2(d, b + 10), sc, su, fn, es + efl + b2(d, b + 32), off];
 }, "zh");
-var z64hs = /* @__PURE__ */ __name(function(d, b, l, z, sc, su, off) {
+var z64hs = /* @__PURE__ */ __name2222(function(d, b, l, z, sc, su, off) {
   var nsc = sc == 4294967295, nsu = su == 4294967295, noff = off == 4294967295, e = b + l;
   var nf = nsc + nsu + noff;
   if (z && nf) {
@@ -1088,7 +1356,7 @@ var z64hs = /* @__PURE__ */ __name(function(d, b, l, z, sc, su, off) {
   }
   return [sc, su, off, 0];
 }, "z64hs");
-var exfl = /* @__PURE__ */ __name(function(ex) {
+var exfl = /* @__PURE__ */ __name2222(function(ex) {
   var le = 0;
   if (ex) {
     for (var k in ex) {
@@ -1100,7 +1368,7 @@ var exfl = /* @__PURE__ */ __name(function(ex) {
   }
   return le;
 }, "exfl");
-var wzh = /* @__PURE__ */ __name(function(d, b, f, fn, u, c, ce, co) {
+var wzh = /* @__PURE__ */ __name2222(function(d, b, f, fn, u, c, ce, co) {
   var fl2 = fn.length, ex = f.extra, col = co && co.length;
   var exl = exfl(ex);
   wbytes(d, b, ce != null ? 33639248 : 67324752), b += 4;
@@ -1139,7 +1407,7 @@ var wzh = /* @__PURE__ */ __name(function(d, b, f, fn, u, c, ce, co) {
     d.set(co, b), b += col;
   return b;
 }, "wzh");
-var wzf = /* @__PURE__ */ __name(function(o, b, c, d, e) {
+var wzf = /* @__PURE__ */ __name2222(function(o, b, c, d, e) {
   wbytes(o, b, 101010256);
   wbytes(o, b + 8, c);
   wbytes(o, b + 10, c);
@@ -1190,6 +1458,10 @@ function zipSync(data, opts) {
   return out;
 }
 __name(zipSync, "zipSync");
+__name2(zipSync, "zipSync");
+__name22(zipSync, "zipSync");
+__name222(zipSync, "zipSync");
+__name2222(zipSync, "zipSync");
 function unzipSync(data, opts) {
   var files = {};
   var e = data.length - 22;
@@ -1232,8 +1504,10 @@ function unzipSync(data, opts) {
   return files;
 }
 __name(unzipSync, "unzipSync");
-
-// src/publish.js
+__name2(unzipSync, "unzipSync");
+__name22(unzipSync, "unzipSync");
+__name222(unzipSync, "unzipSync");
+__name2222(unzipSync, "unzipSync");
 async function publish(env, message = "") {
   const mods = await listMods(env);
   if (mods.length === 0) {
@@ -1308,8 +1582,10 @@ ${message ? `> ${message}` : ""}
   }
 }
 __name(publish, "publish");
-
-// src/index.js
+__name2(publish, "publish");
+__name22(publish, "publish");
+__name222(publish, "publish");
+__name2222(publish, "publish");
 var SESSION_COOKIE = "mp_session";
 var MIRROR_PROXIES = [
   { name: "GitHub \u6E90\u7AD9", prefix: "" },
@@ -1347,6 +1623,10 @@ async function testMirror(url) {
   }
 }
 __name(testMirror, "testMirror");
+__name2(testMirror, "testMirror");
+__name22(testMirror, "testMirror");
+__name222(testMirror, "testMirror");
+__name2222(testMirror, "testMirror");
 async function handleMirrors(request) {
   const base = "https://github.com" + DOWNLOAD_PATH;
   const list = MIRROR_PROXIES.map((p) => ({ name: p.name, url: p.prefix + base }));
@@ -1357,17 +1637,29 @@ async function handleMirrors(request) {
   return json({ mirrors: list });
 }
 __name(handleMirrors, "handleMirrors");
-function json(data, status = 200) {
+__name2(handleMirrors, "handleMirrors");
+__name22(handleMirrors, "handleMirrors");
+__name222(handleMirrors, "handleMirrors");
+__name2222(handleMirrors, "handleMirrors");
+function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8" }
+    headers: { "Content-Type": "application/json; charset=utf-8", ...extraHeaders }
   });
 }
 __name(json, "json");
+__name2(json, "json");
+__name22(json, "json");
+__name222(json, "json");
+__name2222(json, "json");
 function text(msg, status = 400) {
   return new Response(String(msg), { status, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }
 __name(text, "text");
+__name2(text, "text");
+__name22(text, "text");
+__name222(text, "text");
+__name2222(text, "text");
 function getSessionToken(request) {
   const cookie = request.headers.get("Cookie") || "";
   for (const part of cookie.split(";")) {
@@ -1380,26 +1672,89 @@ function getSessionToken(request) {
   return null;
 }
 __name(getSessionToken, "getSessionToken");
+__name2(getSessionToken, "getSessionToken");
+__name22(getSessionToken, "getSessionToken");
+__name222(getSessionToken, "getSessionToken");
+__name2222(getSessionToken, "getSessionToken");
 function sessionCookie(token) {
   return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`;
 }
 __name(sessionCookie, "sessionCookie");
+__name2(sessionCookie, "sessionCookie");
+__name22(sessionCookie, "sessionCookie");
+__name222(sessionCookie, "sessionCookie");
+__name2222(sessionCookie, "sessionCookie");
 function clearSessionCookie() {
   return `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 __name(clearSessionCookie, "clearSessionCookie");
+__name2(clearSessionCookie, "clearSessionCookie");
+__name22(clearSessionCookie, "clearSessionCookie");
+__name222(clearSessionCookie, "clearSessionCookie");
+__name2222(clearSessionCookie, "clearSessionCookie");
 async function isAdmin(request, env) {
   const devToken = request.headers.get("X-Dev-Token");
   if (env.DEV_AUTH_TOKEN && devToken === env.DEV_AUTH_TOKEN) return true;
   const session = await getSession(env, getSessionToken(request));
-  return !!(session && session.login === env.ADMIN_LOGIN);
+  if (!session) return false;
+  const role = await getAdminRole(env, session.login);
+  return role === ROLE_SUPER || role === ROLE_ADMIN;
 }
 __name(isAdmin, "isAdmin");
+__name2(isAdmin, "isAdmin");
+__name22(isAdmin, "isAdmin");
+__name222(isAdmin, "isAdmin");
+__name2222(isAdmin, "isAdmin");
 async function requireAdmin(request, env) {
   if (await isAdmin(request, env)) return null;
   return json({ error: "\u9700\u8981\u7BA1\u7406\u5458\u6743\u9650" }, 403);
 }
 __name(requireAdmin, "requireAdmin");
+__name2(requireAdmin, "requireAdmin");
+__name22(requireAdmin, "requireAdmin");
+__name222(requireAdmin, "requireAdmin");
+__name2222(requireAdmin, "requireAdmin");
+function getBearerToken(request) {
+  const h = String(request.headers.get("Authorization") || "");
+  const m = h.match(/^Bearer\s+(.+)$/i);
+  return m ? m[1].trim() : null;
+}
+__name(getBearerToken, "getBearerToken");
+__name2(getBearerToken, "getBearerToken");
+__name22(getBearerToken, "getBearerToken");
+__name222(getBearerToken, "getBearerToken");
+__name2222(getBearerToken, "getBearerToken");
+async function isValidApiToken(env, token) {
+  if (!token) return false;
+  const id = await env.MODS_KV.get(`api:token:secret:${token}`);
+  if (!id) return false;
+  return Boolean(await env.MODS_KV.get(`api:token:${id}`));
+}
+__name(isValidApiToken, "isValidApiToken");
+__name2(isValidApiToken, "isValidApiToken");
+__name22(isValidApiToken, "isValidApiToken");
+__name222(isValidApiToken, "isValidApiToken");
+__name2222(isValidApiToken, "isValidApiToken");
+async function requireAdminOrToken(request, env) {
+  const bearer = getBearerToken(request);
+  if (bearer && await isValidApiToken(env, bearer)) return null;
+  return requireAdmin(request, env);
+}
+__name(requireAdminOrToken, "requireAdminOrToken");
+__name2(requireAdminOrToken, "requireAdminOrToken");
+__name22(requireAdminOrToken, "requireAdminOrToken");
+__name222(requireAdminOrToken, "requireAdminOrToken");
+__name2222(requireAdminOrToken, "requireAdminOrToken");
+async function currentAdmin(request, env) {
+  const session = await getSession(env, getSessionToken(request));
+  if (!session) return { session: null, role: null };
+  return { session, role: await getAdminRole(env, session.login) };
+}
+__name(currentAdmin, "currentAdmin");
+__name2(currentAdmin, "currentAdmin");
+__name22(currentAdmin, "currentAdmin");
+__name222(currentAdmin, "currentAdmin");
+__name2222(currentAdmin, "currentAdmin");
 async function tryPublish(env) {
   try {
     return await publish(env);
@@ -1409,19 +1764,37 @@ async function tryPublish(env) {
   }
 }
 __name(tryPublish, "tryPublish");
-async function handleLogin(env) {
+__name2(tryPublish, "tryPublish");
+__name22(tryPublish, "tryPublish");
+__name222(tryPublish, "tryPublish");
+__name2222(tryPublish, "tryPublish");
+function safeNext(raw) {
+  if (raw && typeof raw === "string" && /^\/[^/].*/.test(raw)) return raw;
+  return "/admin.html";
+}
+__name(safeNext, "safeNext");
+__name2(safeNext, "safeNext");
+async function handleLogin(request, env) {
   if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
     return text("\u5C1A\u672A\u914D\u7F6E GitHub OAuth\uFF08GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET\uFF09\uFF0C\u8BF7\u7528 wrangler secret \u914D\u7F6E\u540E\u91CD\u8BD5", 400);
   }
+  const next = safeNext(new URL(request.url).searchParams.get("next"));
+  const token = randomHex(16);
+  await env.MODS_KV.put(`oauth:n:${token}`, next, { expirationTtl: 600 });
   const redirectUri = `${env.BASE_URL || "https://modpack-release.catkinr-93f.workers.dev"}/auth/callback`;
-  const url = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(env.GITHUB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=read:user&state=modpack`;
+  const url = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(env.GITHUB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=read:user&state=l:${token}`;
   return Response.redirect(url, 302);
 }
 __name(handleLogin, "handleLogin");
+__name2(handleLogin, "handleLogin");
+__name22(handleLogin, "handleLogin");
+__name222(handleLogin, "handleLogin");
+__name2222(handleLogin, "handleLogin");
 async function handleCallback(request, env) {
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state") || "modpack";
     if (!code) return text("\u7F3A\u5C11\u6388\u6743\u7801", 400);
     const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
       method: "POST",
@@ -1434,25 +1807,435 @@ async function handleCallback(request, env) {
     });
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) {
-      return text(`GitHub \u6388\u6743\u5931\u8D25: ${tokenData.error_description || tokenData.error || "unknown"}`, 400);
+      return oauthResultPage("GitHub \u6388\u6743\u5931\u8D25", `${tokenData.error_description || tokenData.error || "unknown"}`, false);
     }
     const user = await getUser(env, tokenData.access_token);
-    const sessionToken = await createSession(env, user);
-    const redirect = user.login === env.ADMIN_LOGIN ? "/admin.html" : "/";
+    if (state === "bind") {
+      const { session } = await currentAdmin(request, env);
+      if (!session) {
+        return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u5148\u767B\u5F55\u7BA1\u7406\u540E\u53F0\u540E\u518D\u7ED1\u5B9A GitHub\u3002", false, "/auth/login");
+      }
+      const users2 = await ensureAdminUsers(env);
+      const existing = findLoginByOAuth(users2, "github", user.login);
+      if (existing && existing !== session.login) {
+        return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", `\u8BE5 GitHub \u8D26\u53F7\uFF08${user.login}\uFF09\u5DF2\u7ED1\u5B9A\u5230\u8D26\u53F7 ${existing}\u3002`, false, "/admin.html#/admin/profile");
+      }
+      users2[session.login].oauth = users2[session.login].oauth || {};
+      users2[session.login].oauth.github = { login: user.login, name: user.name || user.login, boundAt: (/* @__PURE__ */ new Date()).toISOString() };
+      await writeAdminUsers(env, users2);
+      return new Response(null, { status: 302, headers: { Location: "/admin.html#/admin/profile?oauth=github&status=bound" } });
+    }
+    const users = await ensureAdminUsers(env);
+    let login = null;
+    const legacyRole = await getAdminRole(env, user.login);
+    if (legacyRole) login = user.login;
+    if (!login) login = findLoginByOAuth(users, "github", user.login);
+    if (!login) {
+      return oauthResultPage("\u767B\u5F55\u5931\u8D25", `GitHub \u8D26\u53F7 ${user.login} \u672A\u7ED1\u5B9A\u4EFB\u4F55\u7BA1\u7406\u5458\u8D26\u53F7\u3002<br>\u8BF7\u5148\u7528\u8D26\u53F7\u5BC6\u7801\u767B\u5F55\uFF0C\u5728\u300C\u4E2A\u4EBA\u4E2D\u5FC3 \u2192 OAuth \u7ED1\u5B9A\u300D\u4E2D\u7ED1\u5B9A\u540E\u518D\u4F7F\u7528 GitHub \u767B\u5F55\u3002`, false);
+    }
+    const admin = users[login];
+    const role = admin.role;
+    const sessionToken = await createSession(env, { login, name: admin.name || login, role, avatar_url: user.avatar_url });
+    let next = "/admin.html";
+    if (state.startsWith("l:")) {
+      const t = state.slice(2);
+      const stored = await env.MODS_KV.get(`oauth:n:${t}`);
+      if (stored) next = safeNext(stored);
+      await env.MODS_KV.delete(`oauth:n:${t}`).catch(() => {
+      });
+    }
     return new Response(null, {
       status: 302,
-      headers: { Location: redirect, "Set-Cookie": sessionCookie(sessionToken) }
+      headers: { Location: next, "Set-Cookie": sessionCookie(sessionToken) }
     });
   } catch (e) {
-    return text("\u767B\u5F55\u5931\u8D25: " + e.message, 500);
+    return oauthResultPage("\u767B\u5F55\u5931\u8D25", e.message, false);
   }
 }
 __name(handleCallback, "handleCallback");
+__name2(handleCallback, "handleCallback");
+__name22(handleCallback, "handleCallback");
+__name222(handleCallback, "handleCallback");
+__name2222(handleCallback, "handleCallback");
+async function handlePasswordLogin(request, env) {
+  try {
+    const body = await request.json().catch(() => null);
+    const username = String(body && body.username || "").trim();
+    const password = String(body && body.password || "");
+    if (!username || !password) return json({ error: "\u8BF7\u8F93\u5165\u8D26\u53F7\u548C\u5BC6\u7801" }, 400);
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    const failKey = `login:fail:${username}:${ip}`;
+    const failCount = parseInt(await env.MODS_KV.get(failKey) || "0", 10);
+    if (failCount >= 8) return json({ error: "\u5C1D\u8BD5\u5931\u8D25\u6B21\u6570\u8FC7\u591A\uFF0C\u8BF7 10 \u5206\u949F\u540E\u518D\u8BD5" }, 429);
+    const user = await getAdminUser(env, username);
+    if (!user || !await verifyPassword(password, user.passwordHash)) {
+      await env.MODS_KV.put(failKey, String(failCount + 1), { expirationTtl: 600 });
+      return json({ error: "\u8D26\u53F7\u6216\u5BC6\u7801\u9519\u8BEF" }, 401);
+    }
+    await env.MODS_KV.delete(failKey);
+    const token = await createSession(env, { login: username, name: user.name || username, role: user.role, avatar_url: null });
+    return json(
+      { ok: true, user: { login: username, name: user.name || username, role: user.role } },
+      200,
+      { "Set-Cookie": sessionCookie(token) }
+    );
+  } catch (e) {
+    return json({ error: "\u767B\u5F55\u5931\u8D25\uFF1A" + e.message }, 500);
+  }
+}
+__name(handlePasswordLogin, "handlePasswordLogin");
+__name2(handlePasswordLogin, "handlePasswordLogin");
+__name22(handlePasswordLogin, "handlePasswordLogin");
+__name222(handlePasswordLogin, "handlePasswordLogin");
+__name2222(handlePasswordLogin, "handlePasswordLogin");
+async function handleAdminUsersList(request, env) {
+  const users = await ensureAdminUsers(env);
+  const { session } = await currentAdmin(request, env);
+  const me = session ? session.login : null;
+  const list = Object.keys(users).map((login) => ({
+    login,
+    name: users[login].name || login,
+    role: users[login].role,
+    createdAt: users[login].createdAt,
+    isSelf: login === me,
+    oauth: oauthInfo(users[login])
+  }));
+  return json({ users: list, isSuper: me ? await getAdminRole(env, me) === ROLE_SUPER : false });
+}
+__name(handleAdminUsersList, "handleAdminUsersList");
+__name2(handleAdminUsersList, "handleAdminUsersList");
+__name22(handleAdminUsersList, "handleAdminUsersList");
+__name222(handleAdminUsersList, "handleAdminUsersList");
+__name2222(handleAdminUsersList, "handleAdminUsersList");
+async function handleAdminUsersCreate(request, env) {
+  const { session, role: callerRole } = await currentAdmin(request, env);
+  if (!session || callerRole !== ROLE_SUPER && callerRole !== ROLE_ADMIN) return json({ error: "\u6CA1\u6709\u6743\u9650" }, 403);
+  const body = await request.json().catch(() => null);
+  const username = String(body && body.username || "").trim();
+  const name = String(body && body.name || "").trim() || username;
+  const password = String(body && body.password || "");
+  const role = body && body.role === ROLE_SUPER ? ROLE_SUPER : ROLE_ADMIN;
+  if (!/^[A-Za-z0-9_\-]{2,32}$/.test(username)) return json({ error: "\u8D26\u53F7\u4EC5\u80FD\u5305\u542B\u5B57\u6BCD\u3001\u6570\u5B57\u3001\u4E0B\u5212\u7EBF\u3001\u77ED\u6A2A\u7EBF\uFF082-32\u4F4D\uFF09" }, 400);
+  if (password.length < 6) return json({ error: "\u5BC6\u7801\u81F3\u5C11 6 \u4F4D" }, 400);
+  if (role === ROLE_SUPER && callerRole !== ROLE_SUPER) return json({ error: "\u53EA\u6709\u8D85\u7EA7\u7BA1\u7406\u5458\u53EF\u4EE5\u521B\u5EFA\u8D85\u7EA7\u7BA1\u7406\u5458" }, 403);
+  const users = await ensureAdminUsers(env);
+  if (users[username]) return json({ error: "\u8BE5\u8D26\u53F7\u5DF2\u5B58\u5728" }, 409);
+  users[username] = { name, role, passwordHash: await hashPassword(password), createdAt: (/* @__PURE__ */ new Date()).toISOString() };
+  await writeAdminUsers(env, users);
+  return json({ ok: true, user: { login: username, name, role } });
+}
+__name(handleAdminUsersCreate, "handleAdminUsersCreate");
+__name2(handleAdminUsersCreate, "handleAdminUsersCreate");
+__name22(handleAdminUsersCreate, "handleAdminUsersCreate");
+__name222(handleAdminUsersCreate, "handleAdminUsersCreate");
+__name2222(handleAdminUsersCreate, "handleAdminUsersCreate");
+async function handleAdminUsersDelete(request, env, username) {
+  const { session, role: callerRole } = await currentAdmin(request, env);
+  if (!session || callerRole !== ROLE_SUPER && callerRole !== ROLE_ADMIN) return json({ error: "\u6CA1\u6709\u6743\u9650" }, 403);
+  const users = await ensureAdminUsers(env);
+  if (!users[username]) return json({ error: "\u8D26\u53F7\u4E0D\u5B58\u5728" }, 404);
+  if (username === session.login) return json({ error: "\u4E0D\u80FD\u5220\u9664\u81EA\u5DF1\u7684\u8D26\u53F7" }, 400);
+  if (users[username].role === ROLE_SUPER && callerRole !== ROLE_SUPER) return json({ error: "\u53EA\u6709\u8D85\u7EA7\u7BA1\u7406\u5458\u53EF\u4EE5\u5220\u9664\u8D85\u7EA7\u7BA1\u7406\u5458" }, 403);
+  const superCount = Object.values(users).filter((u) => u.role === ROLE_SUPER).length;
+  if (users[username].role === ROLE_SUPER && superCount <= 1) return json({ error: "\u4E0D\u80FD\u5220\u9664\u6700\u540E\u4E00\u4E2A\u8D85\u7EA7\u7BA1\u7406\u5458" }, 400);
+  delete users[username];
+  await writeAdminUsers(env, users);
+  return json({ ok: true });
+}
+__name(handleAdminUsersDelete, "handleAdminUsersDelete");
+__name2(handleAdminUsersDelete, "handleAdminUsersDelete");
+__name22(handleAdminUsersDelete, "handleAdminUsersDelete");
+__name222(handleAdminUsersDelete, "handleAdminUsersDelete");
+__name2222(handleAdminUsersDelete, "handleAdminUsersDelete");
+async function handleAdminUserPassword(request, env, username) {
+  const { session, role: callerRole } = await currentAdmin(request, env);
+  if (!session || callerRole !== ROLE_SUPER && callerRole !== ROLE_ADMIN) return json({ error: "\u6CA1\u6709\u6743\u9650" }, 403);
+  const body = await request.json().catch(() => null);
+  const password = String(body && body.password || "");
+  if (password.length < 6) return json({ error: "\u5BC6\u7801\u81F3\u5C11 6 \u4F4D" }, 400);
+  if (username !== session.login && callerRole !== ROLE_SUPER) return json({ error: "\u53EA\u80FD\u4FEE\u6539\u81EA\u5DF1\u7684\u5BC6\u7801" }, 403);
+  const users = await ensureAdminUsers(env);
+  if (!users[username]) return json({ error: "\u8D26\u53F7\u4E0D\u5B58\u5728" }, 404);
+  users[username].passwordHash = await hashPassword(password);
+  await writeAdminUsers(env, users);
+  return json({ ok: true });
+}
+__name(handleAdminUserPassword, "handleAdminUserPassword");
+__name2(handleAdminUserPassword, "handleAdminUserPassword");
+__name22(handleAdminUserPassword, "handleAdminUserPassword");
+__name222(handleAdminUserPassword, "handleAdminUserPassword");
+__name2222(handleAdminUserPassword, "handleAdminUserPassword");
+async function handleAdminUserRole(request, env, username) {
+  const { session, role: callerRole } = await currentAdmin(request, env);
+  if (!session || callerRole !== ROLE_SUPER) return json({ error: "\u53EA\u6709\u8D85\u7EA7\u7BA1\u7406\u5458\u53EF\u4EE5\u8C03\u6574\u89D2\u8272" }, 403);
+  const body = await request.json().catch(() => null);
+  const role = body && body.role === ROLE_SUPER ? ROLE_SUPER : ROLE_ADMIN;
+  const users = await ensureAdminUsers(env);
+  if (!users[username]) return json({ error: "\u8D26\u53F7\u4E0D\u5B58\u5728" }, 404);
+  const superCount = Object.values(users).filter((u) => u.role === ROLE_SUPER).length;
+  if (username === session.login && role !== ROLE_SUPER && superCount <= 1) return json({ error: "\u4E0D\u80FD\u964D\u7EA7\u6700\u540E\u4E00\u4E2A\u8D85\u7EA7\u7BA1\u7406\u5458" }, 400);
+  users[username].role = role;
+  await writeAdminUsers(env, users);
+  return json({ ok: true, role });
+}
+__name(handleAdminUserRole, "handleAdminUserRole");
+__name2(handleAdminUserRole, "handleAdminUserRole");
+__name22(handleAdminUserRole, "handleAdminUserRole");
+__name222(handleAdminUserRole, "handleAdminUserRole");
+__name2222(handleAdminUserRole, "handleAdminUserRole");
+async function handleProfileUpdate(request, env) {
+  const { session } = await currentAdmin(request, env);
+  if (!session) return json({ error: "\u672A\u767B\u5F55" }, 401);
+  const body = await request.json().catch(() => null);
+  const name = String(body && body.name || "").trim().slice(0, 40);
+  if (!name) return json({ error: "\u663E\u793A\u540D\u79F0\u4E0D\u80FD\u4E3A\u7A7A" }, 400);
+  const users = await ensureAdminUsers(env);
+  if (!users[session.login]) return json({ error: "\u8D26\u53F7\u4E0D\u5B58\u5728" }, 404);
+  users[session.login].name = name;
+  await writeAdminUsers(env, users);
+  return json({ ok: true, user: { login: session.login, name, role: users[session.login].role } });
+}
+__name(handleProfileUpdate, "handleProfileUpdate");
+__name2(handleProfileUpdate, "handleProfileUpdate");
+__name22(handleProfileUpdate, "handleProfileUpdate");
+__name222(handleProfileUpdate, "handleProfileUpdate");
+__name2222(handleProfileUpdate, "handleProfileUpdate");
+async function handleProfilePassword(request, env) {
+  const { session } = await currentAdmin(request, env);
+  if (!session) return json({ error: "\u672A\u767B\u5F55" }, 401);
+  const body = await request.json().catch(() => null);
+  const oldPassword = String(body && body.oldPassword || "");
+  const newPassword = String(body && body.newPassword || "");
+  if (newPassword.length < 6) return json({ error: "\u65B0\u5BC6\u7801\u81F3\u5C11 6 \u4F4D" }, 400);
+  const users = await ensureAdminUsers(env);
+  const user = users[session.login];
+  if (!user) return json({ error: "\u8D26\u53F7\u4E0D\u5B58\u5728" }, 404);
+  if (!await verifyPassword(oldPassword, user.passwordHash)) return json({ error: "\u65E7\u5BC6\u7801\u4E0D\u6B63\u786E" }, 401);
+  user.passwordHash = await hashPassword(newPassword);
+  await writeAdminUsers(env, users);
+  return json({ ok: true });
+}
+__name(handleProfilePassword, "handleProfilePassword");
+__name2(handleProfilePassword, "handleProfilePassword");
+__name22(handleProfilePassword, "handleProfilePassword");
+__name222(handleProfilePassword, "handleProfilePassword");
+__name2222(handleProfilePassword, "handleProfilePassword");
+var QQ_API_BASE = "http://u.0mz.cn/connect.php";
+function getBaseUrl(env) {
+  return env.BASE_URL || "https://modpack-release.catkinr-93f.workers.dev";
+}
+__name(getBaseUrl, "getBaseUrl");
+__name2(getBaseUrl, "getBaseUrl");
+__name22(getBaseUrl, "getBaseUrl");
+__name222(getBaseUrl, "getBaseUrl");
+__name2222(getBaseUrl, "getBaseUrl");
+function findLoginByOAuth(users, provider, identity) {
+  for (const [login, u] of Object.entries(users)) {
+    const o = u && u.oauth && u.oauth[provider];
+    if (!o) continue;
+    if (provider === "qq" && o.uid && o.uid === identity) return login;
+    if (provider === "github" && o.login && o.login === identity) return login;
+  }
+  return null;
+}
+__name(findLoginByOAuth, "findLoginByOAuth");
+__name2(findLoginByOAuth, "findLoginByOAuth");
+__name22(findLoginByOAuth, "findLoginByOAuth");
+__name222(findLoginByOAuth, "findLoginByOAuth");
+__name2222(findLoginByOAuth, "findLoginByOAuth");
+function oauthInfo(u) {
+  const o = u && u.oauth || {};
+  return {
+    qq: o.qq ? { bound: true, nickname: o.qq.nickname || "", faceimg: o.qq.faceimg || "" } : null,
+    github: o.github ? { bound: true, login: o.github.login || "" } : null
+  };
+}
+__name(oauthInfo, "oauthInfo");
+__name2(oauthInfo, "oauthInfo");
+__name22(oauthInfo, "oauthInfo");
+__name222(oauthInfo, "oauthInfo");
+__name2222(oauthInfo, "oauthInfo");
+function oauthResultPage(title, msg, ok, link) {
+  const icon = ok ? "\u2705" : "\u274C";
+  const btn = link ? `<a href="${link}" class="btn btn-primary" style="text-decoration:none;">\u7EE7\u7EED\u524D\u5F80</a>` : '<a href="/" class="btn btn-primary" style="text-decoration:none;">\u8FD4\u56DE\u4E0B\u8F7D\u9875</a>';
+  const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title} \xB7 \u68A6\u4E4B\u97F5</title>
+<style>body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f6f8;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;color:#1f2329}
+.card{background:#fff;border:1px solid #e8eaee;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:40px 48px;max-width:420px;width:calc(100% - 40px);text-align:center}
+.ico{font-size:52px}.t{font-size:20px;font-weight:800;margin:14px 0 8px}.m{color:#86909c;font-size:14px;line-height:1.9;margin-bottom:24px}
+.btn{display:inline-block;background:#1677ff;color:#fff;padding:10px 26px;border-radius:8px;font-size:14px}
+a.btn:hover{background:#4096ff}</style></head><body><div class="card"><div class="ico">${icon}</div><div class="t">${title}</div><div class="m">${msg}</div>${btn}</div></body></html>`;
+  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+}
+__name(oauthResultPage, "oauthResultPage");
+__name2(oauthResultPage, "oauthResultPage");
+__name22(oauthResultPage, "oauthResultPage");
+__name222(oauthResultPage, "oauthResultPage");
+__name2222(oauthResultPage, "oauthResultPage");
+async function qqApi(env, params) {
+  if (!env.QQ_APPID || !env.QQ_APPKEY) throw new Error("QQ \u805A\u5408\u767B\u5F55\u5C1A\u672A\u914D\u7F6E\uFF08QQ_APPID / QQ_APPKEY\uFF09");
+  const url = new URL(QQ_API_BASE);
+  url.searchParams.set("appid", env.QQ_APPID);
+  url.searchParams.set("appkey", env.QQ_APPKEY);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  const res = await fetch(url.toString());
+  const data = await res.json().catch(() => null);
+  if (!data) throw new Error("QQ \u63A5\u53E3\u65E0\u54CD\u5E94");
+  return data;
+}
+__name(qqApi, "qqApi");
+__name2(qqApi, "qqApi");
+__name22(qqApi, "qqApi");
+__name222(qqApi, "qqApi");
+__name2222(qqApi, "qqApi");
+async function handleQQLoginUrl(env) {
+  try {
+    const data = await qqApi(env, { act: "login", type: "qq", redirect_uri: `${getBaseUrl(env)}/auth/qq/callback` });
+    if (data.code !== 0 || !data.url) throw new Error(data.msg || "\u83B7\u53D6 QQ \u767B\u5F55\u5730\u5740\u5931\u8D25");
+    return json({ url: data.url });
+  } catch (e) {
+    return json({ error: e.message }, 500);
+  }
+}
+__name(handleQQLoginUrl, "handleQQLoginUrl");
+__name2(handleQQLoginUrl, "handleQQLoginUrl");
+__name22(handleQQLoginUrl, "handleQQLoginUrl");
+__name222(handleQQLoginUrl, "handleQQLoginUrl");
+__name2222(handleQQLoginUrl, "handleQQLoginUrl");
+async function handleQQLogin(request, env) {
+  try {
+    const data = await qqApi(env, { act: "login", type: "qq", redirect_uri: `${getBaseUrl(env)}/auth/qq/callback` });
+    if (data.code !== 0 || !data.url) throw new Error(data.msg || "\u83B7\u53D6 QQ \u767B\u5F55\u5730\u5740\u5931\u8D25");
+    const next = safeNext(new URL(request.url).searchParams.get("next"));
+    const token = randomHex(16);
+    await env.MODS_KV.put(`oauth:n:${token}`, next, { expirationTtl: 600 });
+    const sep = data.url.includes("?") ? "&" : "?";
+    return Response.redirect(`${data.url}${sep}state=l:${token}`, 302);
+  } catch (e) {
+    return text("QQ \u767B\u5F55\u521D\u59CB\u5316\u5931\u8D25\uFF1A" + e.message, 500);
+  }
+}
+__name(handleQQLogin, "handleQQLogin");
+__name2(handleQQLogin, "handleQQLogin");
+__name22(handleQQLogin, "handleQQLogin");
+__name222(handleQQLogin, "handleQQLogin");
+__name2222(handleQQLogin, "handleQQLogin");
+async function handleQQBindUrl(env) {
+  try {
+    const data = await qqApi(env, { act: "login", type: "qq", redirect_uri: `${getBaseUrl(env)}/auth/qq/bind-callback` });
+    if (data.code !== 0 || !data.url) throw new Error(data.msg || "\u83B7\u53D6 QQ \u7ED1\u5B9A\u5730\u5740\u5931\u8D25");
+    return json({ url: data.url });
+  } catch (e) {
+    return json({ error: e.message }, 500);
+  }
+}
+__name(handleQQBindUrl, "handleQQBindUrl");
+__name2(handleQQBindUrl, "handleQQBindUrl");
+__name22(handleQQBindUrl, "handleQQBindUrl");
+__name222(handleQQBindUrl, "handleQQBindUrl");
+__name2222(handleQQBindUrl, "handleQQBindUrl");
+async function handleQQCallback(request, env) {
+  try {
+    const code = new URL(request.url).searchParams.get("code");
+    if (!code) return oauthResultPage("\u767B\u5F55\u5931\u8D25", "\u7F3A\u5C11\u6388\u6743\u7801", false);
+    const data = await qqApi(env, { act: "callback", type: "qq", code });
+    if (data.code !== 0 || !data.social_uid) throw new Error(data.msg || "QQ \u767B\u5F55\u5931\u8D25");
+    const users = await ensureAdminUsers(env);
+    const login = findLoginByOAuth(users, "qq", data.social_uid);
+    if (!login) {
+      return oauthResultPage("\u767B\u5F55\u5931\u8D25", `\u8BE5 QQ\uFF08${data.nickname || data.social_uid}\uFF09\u672A\u7ED1\u5B9A\u4EFB\u4F55\u7BA1\u7406\u5458\u8D26\u53F7\u3002<br>\u8BF7\u5148\u7528\u8D26\u53F7\u5BC6\u7801\u767B\u5F55\uFF0C\u5728\u300C\u4E2A\u4EBA\u4E2D\u5FC3 \u2192 OAuth \u7ED1\u5B9A\u300D\u4E2D\u7ED1\u5B9A\u540E\u518D\u4F7F\u7528 QQ \u767B\u5F55\u3002`, false);
+    }
+    const admin = users[login];
+    if (admin.oauth && admin.oauth.qq && data.faceimg && admin.oauth.qq.faceimg !== data.faceimg) {
+      admin.oauth.qq.faceimg = data.faceimg;
+      await writeAdminUsers(env, users);
+    }
+    const token = await createSession(env, { login, name: admin.name || login, role: admin.role, avatar_url: data.faceimg || null });
+    let next = "/admin.html";
+    const state = new URL(request.url).searchParams.get("state") || "";
+    if (state.startsWith("l:")) {
+      const t = state.slice(2);
+      const stored = await env.MODS_KV.get(`oauth:n:${t}`);
+      if (stored) next = safeNext(stored);
+      await env.MODS_KV.delete(`oauth:n:${t}`).catch(() => {
+      });
+    }
+    return new Response(null, { status: 302, headers: { Location: next, "Set-Cookie": sessionCookie(token) } });
+  } catch (e) {
+    return oauthResultPage("\u767B\u5F55\u5931\u8D25", e.message, false);
+  }
+}
+__name(handleQQCallback, "handleQQCallback");
+__name2(handleQQCallback, "handleQQCallback");
+__name22(handleQQCallback, "handleQQCallback");
+__name222(handleQQCallback, "handleQQCallback");
+__name2222(handleQQCallback, "handleQQCallback");
+async function handleQQBindCallback(request, env) {
+  try {
+    const { session } = await currentAdmin(request, env);
+    if (!session) {
+      return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u5148\u767B\u5F55\u7BA1\u7406\u540E\u53F0\u540E\u518D\u7ED1\u5B9A QQ\u3002", false, "/auth/login");
+    }
+    const code = new URL(request.url).searchParams.get("code");
+    if (!code) throw new Error("\u7F3A\u5C11\u6388\u6743\u7801");
+    const data = await qqApi(env, { act: "callback", type: "qq", code });
+    if (data.code !== 0 || !data.social_uid) throw new Error(data.msg || "QQ \u6388\u6743\u5931\u8D25");
+    const users = await ensureAdminUsers(env);
+    const existing = findLoginByOAuth(users, "qq", data.social_uid);
+    if (existing && existing !== session.login) {
+      return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", `\u8BE5 QQ\uFF08${data.nickname || data.social_uid}\uFF09\u5DF2\u7ED1\u5B9A\u5230\u8D26\u53F7 ${existing}\u3002`, false, "/admin.html#/admin/profile");
+    }
+    users[session.login].oauth = users[session.login].oauth || {};
+    users[session.login].oauth.qq = { uid: data.social_uid, nickname: data.nickname || "", faceimg: data.faceimg || "", boundAt: (/* @__PURE__ */ new Date()).toISOString() };
+    await writeAdminUsers(env, users);
+    return new Response(null, { status: 302, headers: { Location: "/admin.html#/admin/profile?oauth=qq&status=bound" } });
+  } catch (e) {
+    return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", e.message, false, "/admin.html#/admin/profile");
+  }
+}
+__name(handleQQBindCallback, "handleQQBindCallback");
+__name2(handleQQBindCallback, "handleQQBindCallback");
+__name22(handleQQBindCallback, "handleQQBindCallback");
+__name222(handleQQBindCallback, "handleQQBindCallback");
+__name2222(handleQQBindCallback, "handleQQBindCallback");
+async function handleGithubBindUrl(env) {
+  if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
+    return json({ error: "\u5C1A\u672A\u914D\u7F6E GitHub OAuth\uFF08GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET\uFF09" }, 400);
+  }
+  const redirectUri = `${getBaseUrl(env)}/auth/callback`;
+  const url = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(env.GITHUB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=read:user&state=bind`;
+  return json({ url });
+}
+__name(handleGithubBindUrl, "handleGithubBindUrl");
+__name2(handleGithubBindUrl, "handleGithubBindUrl");
+__name22(handleGithubBindUrl, "handleGithubBindUrl");
+__name222(handleGithubBindUrl, "handleGithubBindUrl");
+__name2222(handleGithubBindUrl, "handleGithubBindUrl");
+async function handleOAuthUnbind(request, env) {
+  const { session } = await currentAdmin(request, env);
+  if (!session) return json({ error: "\u672A\u767B\u5F55" }, 401);
+  const body = await request.json().catch(() => null);
+  const provider = String(body && body.provider || "");
+  if (provider !== "qq" && provider !== "github") return json({ error: "\u4E0D\u652F\u6301\u7684\u767B\u5F55\u65B9\u5F0F" }, 400);
+  const users = await ensureAdminUsers(env);
+  if (!users[session.login]) return json({ error: "\u8D26\u53F7\u4E0D\u5B58\u5728" }, 404);
+  if (users[session.login].oauth) delete users[session.login].oauth[provider];
+  await writeAdminUsers(env, users);
+  return json({ ok: true });
+}
+__name(handleOAuthUnbind, "handleOAuthUnbind");
+__name2(handleOAuthUnbind, "handleOAuthUnbind");
+__name22(handleOAuthUnbind, "handleOAuthUnbind");
+__name222(handleOAuthUnbind, "handleOAuthUnbind");
+__name2222(handleOAuthUnbind, "handleOAuthUnbind");
 async function handleMods(env) {
   const mods = (await listMods(env)).map((m) => ({ name: m.name, size: m.size, mtime: m.mtime }));
   return json({ mods });
 }
 __name(handleMods, "handleMods");
+__name2(handleMods, "handleMods");
+__name22(handleMods, "handleMods");
+__name222(handleMods, "handleMods");
+__name2222(handleMods, "handleMods");
 async function handleLatest(env) {
   try {
     const release = await getLatestRelease(env);
@@ -1473,6 +2256,10 @@ async function handleLatest(env) {
   }
 }
 __name(handleLatest, "handleLatest");
+__name2(handleLatest, "handleLatest");
+__name22(handleLatest, "handleLatest");
+__name222(handleLatest, "handleLatest");
+__name2222(handleLatest, "handleLatest");
 async function handleReleases(env) {
   try {
     const releases = await listReleases(env);
@@ -1491,15 +2278,80 @@ async function handleReleases(env) {
   }
 }
 __name(handleReleases, "handleReleases");
+__name2(handleReleases, "handleReleases");
+__name22(handleReleases, "handleReleases");
+__name222(handleReleases, "handleReleases");
+__name2222(handleReleases, "handleReleases");
+async function handleReleaseDetail(env, id) {
+  try {
+    const release = await getRelease(env, id);
+    if (!release) return json({ error: "\u7248\u672C\u4E0D\u5B58\u5728" }, 404);
+    return json({
+      release: {
+        id: release.id,
+        tag: release.tag_name,
+        name: release.name,
+        body: release.body,
+        published_at: release.published_at,
+        html_url: release.html_url,
+        assets: (release.assets || []).map((a) => ({
+          id: a.id,
+          name: a.name,
+          url: a.browser_download_url,
+          size: a.size,
+          download_count: a.download_count
+        }))
+      }
+    });
+  } catch (e) {
+    return json({ error: e.message || "\u670D\u52A1\u5668\u5185\u90E8\u9519\u8BEF" }, e.status || 500);
+  }
+}
+__name(handleReleaseDetail, "handleReleaseDetail");
+__name2(handleReleaseDetail, "handleReleaseDetail");
+__name22(handleReleaseDetail, "handleReleaseDetail");
+__name222(handleReleaseDetail, "handleReleaseDetail");
+__name2222(handleReleaseDetail, "handleReleaseDetail");
+async function handleAdminStats(env) {
+  const [mods, releases, state] = await Promise.all([listMods(env), listReleases(env), readState(env)]);
+  const indexRaw = await env.MODS_KV.get("ticket:index");
+  const ids = indexRaw ? JSON.parse(indexRaw) : [];
+  const tickets = [];
+  for (const id of ids.slice(-300)) {
+    const raw = await env.MODS_KV.get(`ticket:${id}`);
+    if (raw) tickets.push(JSON.parse(raw));
+  }
+  return json({
+    stats: {
+      mods: mods.length,
+      releases: releases.length,
+      tickets: tickets.length,
+      pendingTickets: tickets.filter((t) => t.status === "new").length,
+      currentVersion: state.currentVersion || null,
+      lastReleaseTag: state.lastReleaseTag || null
+    },
+    recentReleases: releases.slice(0, 5).map((r) => ({ id: r.id, tag: r.tag, name: r.name, published_at: r.published_at })),
+    recentTickets: tickets.slice(-5).reverse().map((t) => ({ id: t.id, nickname: t.nickname, gamename: t.gamename, status: t.status, createdAt: t.createdAt }))
+  });
+}
+__name(handleAdminStats, "handleAdminStats");
+__name2(handleAdminStats, "handleAdminStats");
+__name22(handleAdminStats, "handleAdminStats");
+__name222(handleAdminStats, "handleAdminStats");
+__name2222(handleAdminStats, "handleAdminStats");
 async function handleAdminModsList(env) {
   return json({ mods: await listMods(env) });
 }
 __name(handleAdminModsList, "handleAdminModsList");
+__name2(handleAdminModsList, "handleAdminModsList");
+__name22(handleAdminModsList, "handleAdminModsList");
+__name222(handleAdminModsList, "handleAdminModsList");
+__name2222(handleAdminModsList, "handleAdminModsList");
 function extractJarsFromZip(buf, maxBytes) {
   let files;
   try {
     files = unzipSync(new Uint8Array(buf), {
-      filter: /* @__PURE__ */ __name((f) => (f.name.split("/").pop() || "").toLowerCase().endsWith(".jar"), "filter")
+      filter: /* @__PURE__ */ __name2222((f) => (f.name.split("/").pop() || "").toLowerCase().endsWith(".jar"), "filter")
     });
   } catch (e) {
     throw new Error("ZIP \u89E3\u538B\u5931\u8D25: " + (e.message || "\u65E0\u6CD5\u89E3\u6790\u538B\u7F29\u5305"));
@@ -1524,6 +2376,10 @@ function extractJarsFromZip(buf, maxBytes) {
   }));
 }
 __name(extractJarsFromZip, "extractJarsFromZip");
+__name2(extractJarsFromZip, "extractJarsFromZip");
+__name22(extractJarsFromZip, "extractJarsFromZip");
+__name222(extractJarsFromZip, "extractJarsFromZip");
+__name2222(extractJarsFromZip, "extractJarsFromZip");
 async function handleAdminUpload(request, env) {
   try {
     const form = await request.formData();
@@ -1561,6 +2417,10 @@ async function handleAdminUpload(request, env) {
   }
 }
 __name(handleAdminUpload, "handleAdminUpload");
+__name2(handleAdminUpload, "handleAdminUpload");
+__name22(handleAdminUpload, "handleAdminUpload");
+__name222(handleAdminUpload, "handleAdminUpload");
+__name2222(handleAdminUpload, "handleAdminUpload");
 async function handleAdminRename(request, env) {
   try {
     const body = await request.json();
@@ -1576,6 +2436,10 @@ async function handleAdminRename(request, env) {
   }
 }
 __name(handleAdminRename, "handleAdminRename");
+__name2(handleAdminRename, "handleAdminRename");
+__name22(handleAdminRename, "handleAdminRename");
+__name222(handleAdminRename, "handleAdminRename");
+__name2222(handleAdminRename, "handleAdminRename");
 async function handleAdminDelete(request, env, name) {
   try {
     const decoded = decodeURIComponent(name);
@@ -1587,6 +2451,105 @@ async function handleAdminDelete(request, env, name) {
   }
 }
 __name(handleAdminDelete, "handleAdminDelete");
+__name2(handleAdminDelete, "handleAdminDelete");
+__name22(handleAdminDelete, "handleAdminDelete");
+__name222(handleAdminDelete, "handleAdminDelete");
+__name2222(handleAdminDelete, "handleAdminDelete");
+async function handleMrpackUpload(request, env) {
+  try {
+    const form = await request.formData();
+    const file = form.get("file");
+    if (!file || typeof file === "string") return json({ error: "\u672A\u6536\u5230\u6587\u4EF6" }, 400);
+    const name = file.name || "";
+    if (!name.toLowerCase().endsWith(".mrpack") && !name.toLowerCase().endsWith(".zip")) {
+      return json({ error: "\u4EC5\u652F\u6301 .mrpack \u6A21\u7EC4\u5305\u6587\u4EF6" }, 400);
+    }
+    const maxBytes = parseInt(env.MAX_UPLOAD_MB || "100", 10) * 1024 * 1024;
+    const buf = await file.arrayBuffer();
+    if (buf.byteLength > maxBytes) return json({ error: "\u6587\u4EF6\u8D85\u8FC7\u5927\u5C0F\u4E0A\u9650" }, 400);
+    const unzipped = unzipSync(new Uint8Array(buf), {});
+    let indexJson = null;
+    const fileNames = Object.keys(unzipped);
+    for (const fn of fileNames) {
+      if (fn.replace(/\\/g, "/").split("/").pop() === "modrinth.index.json") {
+        indexJson = JSON.parse(new TextDecoder().decode(unzipped[fn]));
+        break;
+      }
+    }
+    if (!indexJson || !Array.isArray(indexJson.files)) {
+      return json({ error: "\u672A\u627E\u5230 modrinth.index.json \u6216\u683C\u5F0F\u4E0D\u6B63\u786E\uFF0C\u4E0D\u662F\u6709\u6548\u7684 .mrpack \u6587\u4EF6" }, 400);
+    }
+    const modsToDownload = indexJson.files.filter((f) => {
+      const path = (f.path || "").replace(/\\/g, "/");
+      return path.toLowerCase().startsWith("mods/") && path.toLowerCase().endsWith(".jar");
+    });
+    if (modsToDownload.length === 0) return json({ error: ".mrpack \u4E2D\u672A\u627E\u5230 mods/ \u76EE\u5F55\u4E0B\u7684 .jar \u6A21\u7EC4" }, 400);
+    let message = "";
+    try {
+      message = (form.get("message") || "").toString().slice(0, 500);
+    } catch (_) {
+    }
+    const existing = await listMods(env);
+    for (const m of existing) {
+      await deleteRepoFile(env, `mods/${m.name}`, `\u5BFC\u5165 mrpack\uFF1A\u79FB\u9664\u65E7\u6A21\u7EC4 ${m.name}`).catch(() => {
+      });
+    }
+    const results = [];
+    const errors = [];
+    const downloadConcurrency = parseInt(env.MRPACK_CONCURRENCY || "5", 10);
+    for (let i2 = 0; i2 < modsToDownload.length; i2 += downloadConcurrency) {
+      const batch = modsToDownload.slice(i2, i2 + downloadConcurrency);
+      const settled = await Promise.allSettled(batch.map(async (entry) => {
+        const rawPath = (entry.path || "").replace(/\\/g, "/");
+        const fileName = rawPath.split("/").pop();
+        const hashes = entry.hashes || {};
+        const sha1 = hashes.sha1 || hashes["sha-1"];
+        const sha512 = hashes.sha512 || hashes["sha-512"];
+        const primaryUrl = (entry.downloads || [])[0];
+        if (!primaryUrl) throw new Error(`${fileName}\uFF1A\u65E0\u4E0B\u8F7D\u5730\u5740`);
+        const headers2 = {};
+        if (sha1) headers2["If-None-Match"] = "";
+        const res = await fetch(primaryUrl, { headers: headers2, cf: { cacheTtl: 3600 } });
+        if (!res.ok) throw new Error(`${fileName}\uFF1A\u4E0B\u8F7D\u5931\u8D25 (${res.status})`);
+        const data = await res.arrayBuffer();
+        if (data.byteLength === 0) throw new Error(`${fileName}\uFF1A\u4E0B\u8F7D\u5185\u5BB9\u4E3A\u7A7A`);
+        if (sha1 || sha512) {
+          const algo = sha1 ? "SHA-1" : "SHA-512";
+          const expected = (sha1 || sha512).toLowerCase();
+          const digest = await crypto.subtle.digest(algo, data);
+          const actual = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+          if (actual !== expected) throw new Error(`${fileName}\uFF1A\u54C8\u5E0C\u6821\u9A8C\u5931\u8D25`);
+        }
+        await putMod(env, fileName, data, data.byteLength);
+        return { name: fileName, size: data.byteLength, ok: true };
+      }));
+      for (let j = 0; j < settled.length; j++) {
+        const r = settled[j];
+        if (r.status === "fulfilled") results.push(r.value);
+        else errors.push(r.reason?.message || String(r.reason));
+      }
+    }
+    if (results.length === 0) {
+      return json({ error: "\u6240\u6709\u6A21\u7EC4\u4E0B\u8F7D\u5931\u8D25", details: errors }, 502);
+    }
+    const publishResult = await tryPublish(env);
+    return json({
+      ok: true,
+      downloaded: results.length,
+      failed: errors.length,
+      mods: results,
+      errors: errors.length ? errors : void 0,
+      publish: publishResult
+    });
+  } catch (e) {
+    return json({ error: e.message || ".mrpack \u5BFC\u5165\u5931\u8D25" }, e.status || 500);
+  }
+}
+__name(handleMrpackUpload, "handleMrpackUpload");
+__name2(handleMrpackUpload, "handleMrpackUpload");
+__name22(handleMrpackUpload, "handleMrpackUpload");
+__name222(handleMrpackUpload, "handleMrpackUpload");
+__name2222(handleMrpackUpload, "handleMrpackUpload");
 async function handleAdminPublish(request, env) {
   try {
     let message = "";
@@ -1602,6 +2565,10 @@ async function handleAdminPublish(request, env) {
   }
 }
 __name(handleAdminPublish, "handleAdminPublish");
+__name2(handleAdminPublish, "handleAdminPublish");
+__name22(handleAdminPublish, "handleAdminPublish");
+__name222(handleAdminPublish, "handleAdminPublish");
+__name2222(handleAdminPublish, "handleAdminPublish");
 async function handleAdminReleaseRollback(request, env) {
   try {
     const body = await request.json();
@@ -1629,6 +2596,10 @@ async function handleAdminReleaseRollback(request, env) {
   }
 }
 __name(handleAdminReleaseRollback, "handleAdminReleaseRollback");
+__name2(handleAdminReleaseRollback, "handleAdminReleaseRollback");
+__name22(handleAdminReleaseRollback, "handleAdminReleaseRollback");
+__name222(handleAdminReleaseRollback, "handleAdminReleaseRollback");
+__name2222(handleAdminReleaseRollback, "handleAdminReleaseRollback");
 async function handleAdminReleaseDelete(request, env, id) {
   try {
     const release = await getRelease(env, id);
@@ -1655,35 +2626,274 @@ async function handleAdminReleaseDelete(request, env, id) {
   }
 }
 __name(handleAdminReleaseDelete, "handleAdminReleaseDelete");
-
-// ==================== 工单系统 ====================
-// 通过 Resend HTTP API 发送纯文本邮件
-async function sendEmail(env, to, subject, body) {
+__name2(handleAdminReleaseDelete, "handleAdminReleaseDelete");
+__name22(handleAdminReleaseDelete, "handleAdminReleaseDelete");
+__name222(handleAdminReleaseDelete, "handleAdminReleaseDelete");
+__name2222(handleAdminReleaseDelete, "handleAdminReleaseDelete");
+async function sendEmail(env, to, subject, body, html) {
   const apiKey = env.RESEND_API_KEY;
   if (!apiKey || apiKey.startsWith("re_xxxx")) throw new Error("\u672A\u914D\u7F6E RESEND_API_KEY");
-  const from = env.MAIL_FROM || "\u5DE5\u5355\u7CFB\u7EDF <noreply@camzy.uno>";
+  let from = env.MAIL_FROM || "\u5DE5\u5355\u7CFB\u7EDF <noreply@mail.catfix.top>";
+  try {
+    const list = JSON.parse(env.MAIL_FROM_LIST || "[]");
+    if (Array.isArray(list) && list.length) {
+      from = list[Math.floor(Math.random() * list.length)];
+    }
+  } catch (_) {
+  }
+  const payload = { from, to: [to], subject, text: body };
+  if (html) payload.html = html;
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ from, to: [to], subject, text: body })
+    body: JSON.stringify(payload)
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`Resend ${res.status}: ${data.message || JSON.stringify(data)}`);
   return data;
 }
 __name(sendEmail, "sendEmail");
+__name2(sendEmail, "sendEmail");
+__name22(sendEmail, "sendEmail");
+__name222(sendEmail, "sendEmail");
+__name2222(sendEmail, "sendEmail");
+function escHtml(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+__name(escHtml, "escHtml");
+__name2(escHtml, "escHtml");
+__name22(escHtml, "escHtml");
+__name222(escHtml, "escHtml");
+__name2222(escHtml, "escHtml");
+function inlineMd(s) {
+  s = s.replace(/`([^`]+)`/g, (m, c) => `<code>${c}</code>`);
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2">$1</a>');
+  return s;
+}
+__name(inlineMd, "inlineMd");
+__name2(inlineMd, "inlineMd");
+__name22(inlineMd, "inlineMd");
+__name222(inlineMd, "inlineMd");
+__name2222(inlineMd, "inlineMd");
+function mdToHtml(md) {
+  const lines = String(md || "").replace(/\r\n/g, "\n").split("\n");
+  const out = [];
+  let inCode = false;
+  let codeBuf = [];
+  let listType = null;
+  let para = [];
+  const flushPara = /* @__PURE__ */ __name222(() => {
+    if (para.length) {
+      out.push(`<p>${inlineMd(para.map(escHtml).join("<br>"))}</p>`);
+      para = [];
+    }
+  }, "flushPara");
+  const closeList = /* @__PURE__ */ __name222(() => {
+    if (listType) {
+      out.push(`</${listType}>`);
+      listType = null;
+    }
+  }, "closeList");
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line.startsWith("```")) {
+      flushPara();
+      closeList();
+      if (inCode) {
+        out.push(`<pre><code>${escHtml(codeBuf.join("\n"))}</code></pre>`);
+        codeBuf = [];
+        inCode = false;
+      } else {
+        inCode = true;
+      }
+      continue;
+    }
+    if (inCode) {
+      codeBuf.push(raw);
+      continue;
+    }
+    if (!line) {
+      flushPara();
+      closeList();
+      continue;
+    }
+    if (/^#{1,4}\s/.test(line)) {
+      flushPara();
+      closeList();
+      const lvl = Math.min(line.match(/^#{1,4}/)[1].length + 1, 5);
+      out.push(`<h${lvl}>${inlineMd(escHtml(line.replace(/^#{1,4}\s*/, "")))}</h${lvl}>`);
+      continue;
+    }
+    if (/^>\s?/.test(line)) {
+      flushPara();
+      closeList();
+      out.push(`<blockquote>${inlineMd(escHtml(line.replace(/^>\s?/, "")))}</blockquote>`);
+      continue;
+    }
+    if (/^[-*]\s/.test(line)) {
+      flushPara();
+      if (listType !== "ul") {
+        closeList();
+        out.push("<ul>");
+        listType = "ul";
+      }
+      out.push(`<li>${inlineMd(escHtml(line.replace(/^[-*]\s/, "")))}</li>`);
+      continue;
+    }
+    if (/^\d+\.\s/.test(line)) {
+      flushPara();
+      if (listType !== "ol") {
+        closeList();
+        out.push("<ol>");
+        listType = "ol";
+      }
+      out.push(`<li>${inlineMd(escHtml(line.replace(/^\d+\.\s/, "")))}</li>`);
+      continue;
+    }
+    if (/^(-{3,}|\*{3,})$/.test(line)) {
+      flushPara();
+      closeList();
+      out.push("<hr>");
+      continue;
+    }
+    para.push(raw);
+  }
+  flushPara();
+  closeList();
+  if (inCode) out.push(`<pre><code>${escHtml(codeBuf.join("\n"))}</code></pre>`);
+  return out.join("");
+}
+__name(mdToHtml, "mdToHtml");
+__name2(mdToHtml, "mdToHtml");
+__name22(mdToHtml, "mdToHtml");
+__name222(mdToHtml, "mdToHtml");
+__name2222(mdToHtml, "mdToHtml");
+function emailShell(title, inner) {
+  return `<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#fdf0f5;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;">
+<div style="max-width:600px;margin:0 auto;padding:30px 16px;">
+  <div style="background:rgba(255,255,255,.9);border:1px solid #f7d3e2;border-radius:18px;padding:30px 32px;box-shadow:0 10px 32px rgba(233,111,157,.14);">
+    <div style="font-size:20px;font-weight:700;color:#e35d8e;margin-bottom:18px;">${escHtml(title)}</div>
+    <div style="color:#6b5560;font-size:14px;line-height:1.9;">${inner}</div>
+    <div style="margin-top:26px;padding-top:16px;border-top:1px solid #f3dce8;color:#b89aa8;font-size:12px;line-height:1.8;">
+      \u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF<br>\u5B98\u65B9\u53D1\u4EF6\u90AE\u7BB1\uFF1Anoreply@mail.catfix.top / noreply@camzy.uno<br>\u5176\u4ED6\u5730\u5740\u53D1\u6765\u7684"\u5DE5\u5355"\u90AE\u4EF6\u5747\u4E3A\u4EFF\u5192\uFF0C\u8BF7\u52FF\u56DE\u590D\u3002
+    </div>
+  </div>
+</div>
+</body></html>`;
+}
+__name(emailShell, "emailShell");
+__name2(emailShell, "emailShell");
+__name22(emailShell, "emailShell");
+__name222(emailShell, "emailShell");
+__name2222(emailShell, "emailShell");
+function verifyEmailHtml(nickname, code) {
+  return emailShell("\u90AE\u7BB1\u9A8C\u8BC1\u7801", `
+<p>\u4F60\u597D <strong>${escHtml(nickname)}</strong>\uFF1A</p>
+<p>\u4F60\u6B63\u5728 <strong>\u68A6\u4E4B\u97F5</strong> \u63D0\u4EA4\u5DE5\u5355\uFF0C\u8BF7\u8F93\u5165\u4EE5\u4E0B\u9A8C\u8BC1\u7801\u5B8C\u6210\u63D0\u4EA4\uFF08<strong>10 \u5206\u949F\u5185\u6709\u6548</strong>\uFF09\uFF1A</p>
+<div style="margin:22px 0;text-align:center;background:#fdf0f5;border:1px dashed #e89bb8;border-radius:14px;padding:20px;">
+  <div style="font-size:36px;font-weight:800;letter-spacing:10px;color:#d64b7f;font-family:Consolas,Menlo,monospace;">${escHtml(code)}</div>
+</div>
+<p style="color:#b89aa8;font-size:12px;">\u5982\u679C\u8FD9\u4E0D\u662F\u4F60\u672C\u4EBA\u7684\u64CD\u4F5C\uFF0C\u8BF7\u5FFD\u7565\u672C\u90AE\u4EF6\u3002</p>`);
+}
+__name(verifyEmailHtml, "verifyEmailHtml");
+__name2(verifyEmailHtml, "verifyEmailHtml");
+__name22(verifyEmailHtml, "verifyEmailHtml");
+__name222(verifyEmailHtml, "verifyEmailHtml");
+__name2222(verifyEmailHtml, "verifyEmailHtml");
+function notifyAdminEmailHtml(id, ticket) {
+  const rows = [
+    ["\u5DE5\u5355\u7F16\u53F7", id],
+    ["\u7B80\u79F0", ticket.nickname],
+    ["\u6E38\u620F\u540D", ticket.gamename],
+    ["\u7528\u6237\u90AE\u7BB1", ticket.email],
+    ["\u63D0\u4EA4\u65F6\u95F4", ticket.createdAt]
+  ].map(([k, v]) => `
+    <tr>
+      <td style="padding:6px 16px 6px 0;color:#b89aa8;font-size:13px;white-space:nowrap;vertical-align:top;">${escHtml(k)}</td>
+      <td style="padding:6px 0;color:#6b5560;font-size:14px;vertical-align:top;overflow-wrap:anywhere;">${escHtml(v)}</td>
+    </tr>`).join("");
+  return emailShell("\u6536\u5230\u65B0\u5DE5\u5355", `
+<p>\u6709\u7528\u6237\u63D0\u4EA4\u4E86\u65B0\u5DE5\u5355\uFF0C\u8BF7\u53CA\u65F6\u5904\u7406\uFF1A</p>
+<table style="border-collapse:collapse;margin:16px 0;width:100%;">${rows}</table>
+<div style="background:#fdf0f5;border:1px solid #f3dce8;border-radius:12px;padding:14px 16px;">
+  <div style="font-size:12px;color:#b89aa8;margin-bottom:6px;">\u7528\u6237\u7559\u8A00\uFF1A</div>
+  <div style="color:#6b5560;font-size:14px;line-height:1.9;white-space:pre-wrap;">${escHtml(ticket.content)}</div>
+</div>
+<p style="color:#b89aa8;font-size:12px;">\u8BF7\u524D\u5F80\u7BA1\u7406\u540E\u53F0\u5904\u7406\uFF1Ahttps://releases.camzy.uno/tickets</p>`);
+}
+__name(notifyAdminEmailHtml, "notifyAdminEmailHtml");
+__name2(notifyAdminEmailHtml, "notifyAdminEmailHtml");
+__name22(notifyAdminEmailHtml, "notifyAdminEmailHtml");
+__name222(notifyAdminEmailHtml, "notifyAdminEmailHtml");
+__name2222(notifyAdminEmailHtml, "notifyAdminEmailHtml");
+function officialFroms(env) {
+  let list = [];
+  try {
+    const l = JSON.parse(env.MAIL_FROM_LIST || "[]");
+    if (Array.isArray(l)) list = l;
+  } catch (_) {
+  }
+  if (!list.length && env.MAIL_FROM) list = [env.MAIL_FROM];
+  return list.map((s) => {
+    const m = String(s).match(/<([^>]+)>/);
+    return m && m[1] || String(s).trim();
+  }).filter(Boolean);
+}
+__name(officialFroms, "officialFroms");
+__name2(officialFroms, "officialFroms");
+__name22(officialFroms, "officialFroms");
+__name222(officialFroms, "officialFroms");
+__name2222(officialFroms, "officialFroms");
+async function handleTicketInfo(env) {
+  return json({ official: officialFroms(env) });
+}
+__name(handleTicketInfo, "handleTicketInfo");
+__name2(handleTicketInfo, "handleTicketInfo");
+__name22(handleTicketInfo, "handleTicketInfo");
+__name222(handleTicketInfo, "handleTicketInfo");
+__name2222(handleTicketInfo, "handleTicketInfo");
 function isValidEmail(s) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 __name(isValidEmail, "isValidEmail");
+__name2(isValidEmail, "isValidEmail");
+__name22(isValidEmail, "isValidEmail");
+__name222(isValidEmail, "isValidEmail");
+__name2222(isValidEmail, "isValidEmail");
+async function getNotifyEmails(env) {
+  const raw = await env.MODS_KV.get("ticket:notify-emails");
+  if (raw) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    } catch (_) {
+    }
+  }
+  const def = env.ADMIN_EMAIL ? [env.ADMIN_EMAIL] : [];
+  await env.MODS_KV.put("ticket:notify-emails", JSON.stringify(def));
+  return def;
+}
+__name(getNotifyEmails, "getNotifyEmails");
+__name2(getNotifyEmails, "getNotifyEmails");
+__name22(getNotifyEmails, "getNotifyEmails");
+__name222(getNotifyEmails, "getNotifyEmails");
+__name2222(getNotifyEmails, "getNotifyEmails");
 function ticketId(d) {
-  const p = (n, l = 2) => String(n).padStart(l, "0");
+  const p = /* @__PURE__ */ __name222((n, l = 2) => String(n).padStart(l, "0"), "p");
   return `T${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${Math.floor(100 + Math.random() * 900)}`;
 }
 __name(ticketId, "ticketId");
+__name2(ticketId, "ticketId");
+__name22(ticketId, "ticketId");
+__name222(ticketId, "ticketId");
+__name2222(ticketId, "ticketId");
 async function handleTicketSubmit(request, env) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -1694,16 +2904,27 @@ async function handleTicketSubmit(request, env) {
     if (!nickname || !gamename || !email || !content) {
       return json({ error: "\u8BF7\u586B\u5199\u7B80\u79F0\u3001\u6E38\u620F\u540D\u3001\u90AE\u7BB1\u548C\u7559\u8A00\u5185\u5BB9" }, 400);
     }
-    if (nickname.length > 20 || gamename.length > 40 || content.length > 5000) {
+    if (nickname.length > 20 || gamename.length > 40 || content.length > 5e3) {
       return json({ error: "\u5185\u5BB9\u957F\u5EA6\u8D85\u51FA\u9650\u5236" }, 400);
     }
     if (!isValidEmail(email)) return json({ error: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E" }, 400);
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const pending = { nickname, gamename, email, content, code, at: new Date().toISOString() };
+    const code = String(Math.floor(1e5 + Math.random() * 9e5));
+    const pending = { nickname, gamename, email, content, code, at: (/* @__PURE__ */ new Date()).toISOString() };
     await env.MODS_KV.put(`ticket:verify:${email.toLowerCase()}`, JSON.stringify(pending), { expirationTtl: 600 });
     try {
-      await sendEmail(env, email, "【\u68A6\u4E4B\u97F5\u5DE5\u5355】\u90AE\u7BB1\u9A8C\u8BC1\u7801",
-        `\u4F60\u597D ${nickname} \uFF1A\n\n\u4F60\u6B63\u5728\u68A6\u4E4B\u97F5\u63D0\u4EA4\u5DE5\u5355\uFF0C\u4F60\u7684\u9A8C\u8BC1\u7801\u662F\uFF1A${code}\n\n\u8BF7\u5728 10 \u5206\u949F\u5185\u586B\u5199\u9A8C\u8BC1\u7801\u5B8C\u6210\u63D0\u4EA4\u3002\u5982\u975E\u672C\u4EBA\u64CD\u4F5C\uFF0C\u8BF7\u5FFD\u7565\u672C\u90AE\u4EF6\u3002\n\n\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`);
+      await sendEmail(
+        env,
+        email,
+        "\u3010\u68A6\u4E4B\u97F5\u5DE5\u5355\u3011\u90AE\u7BB1\u9A8C\u8BC1\u7801",
+        `\u4F60\u597D ${nickname} \uFF1A
+
+\u4F60\u6B63\u5728\u68A6\u4E4B\u97F5\u63D0\u4EA4\u5DE5\u5355\uFF0C\u4F60\u7684\u9A8C\u8BC1\u7801\u662F\uFF1A${code}
+
+\u8BF7\u5728 10 \u5206\u949F\u5185\u586B\u5199\u9A8C\u8BC1\u7801\u5B8C\u6210\u63D0\u4EA4\u3002\u5982\u975E\u672C\u4EBA\u64CD\u4F5C\uFF0C\u8BF7\u5FFD\u7565\u672C\u90AE\u4EF6\u3002
+
+\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`,
+        verifyEmailHtml(nickname, code)
+      );
     } catch (e) {
       await env.MODS_KV.delete(`ticket:verify:${email.toLowerCase()}`).catch(() => {
       });
@@ -1715,7 +2936,11 @@ async function handleTicketSubmit(request, env) {
   }
 }
 __name(handleTicketSubmit, "handleTicketSubmit");
-async function handleTicketVerify(request, env) {
+__name2(handleTicketSubmit, "handleTicketSubmit");
+__name22(handleTicketSubmit, "handleTicketSubmit");
+__name222(handleTicketSubmit, "handleTicketSubmit");
+__name2222(handleTicketSubmit, "handleTicketSubmit");
+async function handleTicketVerify(request, env, ctx) {
   try {
     const body = await request.json().catch(() => ({}));
     const email = String(body.email || "").trim().toLowerCase();
@@ -1725,7 +2950,7 @@ async function handleTicketVerify(request, env) {
     const pending = JSON.parse(raw);
     if (pending.code !== code) return json({ error: "\u9A8C\u8BC1\u7801\u4E0D\u6B63\u786E" }, 400);
     await env.MODS_KV.delete(`ticket:verify:${email}`);
-    const id = ticketId(new Date());
+    const id = ticketId(/* @__PURE__ */ new Date());
     const ticket = {
       id,
       nickname: pending.nickname,
@@ -1733,7 +2958,7 @@ async function handleTicketVerify(request, env) {
       email: pending.email,
       content: pending.content,
       status: "new",
-      createdAt: new Date().toISOString(),
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       replies: []
     };
     await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
@@ -1741,20 +2966,404 @@ async function handleTicketVerify(request, env) {
     const index = indexRaw ? JSON.parse(indexRaw) : [];
     index.unshift(id);
     await env.MODS_KV.put("ticket:index", JSON.stringify(index.slice(0, 300)));
-    if (env.ADMIN_EMAIL) {
-      try {
-        await sendEmail(env, env.ADMIN_EMAIL, `【\u65B0\u5DE5\u5355】${id} \u6765\u81EA ${ticket.nickname}`,
-          `\u65B0\u5DE5\u5355 ${id}\n\u7B80\u79F0\uFF1A${ticket.nickname}\n\u6E38\u620F\u540D\uFF1A${ticket.gamename}\n\u90AE\u7BB1\uFF1A${ticket.email}\n\u65F6\u95F4\uFF1A${ticket.createdAt}\n\n\u7559\u8A00\u5185\u5BB9\uFF1A\n${ticket.content}`);
-      } catch (e) {
-        console.error("[ticket-notify-admin]", e.message);
-      }
-    }
+    const proc = autoProcessTicket(env, id);
+    if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(proc);
+    else await proc;
     return json({ ok: true, id, message: "\u5DE5\u5355\u63D0\u4EA4\u6210\u529F" });
   } catch (e) {
     return json({ error: e.message || "\u9A8C\u8BC1\u5931\u8D25" }, 500);
   }
 }
 __name(handleTicketVerify, "handleTicketVerify");
+__name2(handleTicketVerify, "handleTicketVerify");
+__name22(handleTicketVerify, "handleTicketVerify");
+__name222(handleTicketVerify, "handleTicketVerify");
+__name2222(handleTicketVerify, "handleTicketVerify");
+function clientIP(request) {
+  return request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || "unknown";
+}
+__name(clientIP, "clientIP");
+__name2(clientIP, "clientIP");
+async function checkRateLimit(env, kind, key, limit, windowSeconds) {
+  const rlKey = `er:rl:${kind}:${key}`;
+  const raw = await env.MODS_KV.get(rlKey);
+  const hits = raw ? JSON.parse(raw) : [];
+  const now = Date.now();
+  const recent = hits.filter((t) => t > now - windowSeconds * 1e3);
+  if (recent.length >= limit) {
+    const oldest = recent[0] || now;
+    return { error: "\u8BF7\u6C42\u8FC7\u4E8E\u9891\u7E41\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5", retryAfter: Math.max(1, Math.ceil((oldest + windowSeconds * 1e3 - now) / 1e3)) };
+  }
+  recent.push(now);
+  await env.MODS_KV.put(rlKey, JSON.stringify(recent), { expirationTtl: windowSeconds + 60 });
+  return null;
+}
+__name(checkRateLimit, "checkRateLimit");
+__name2(checkRateLimit, "checkRateLimit");
+function extractLogsFromZip(buf, maxFiles, maxTotalBytes, maxPerFileBytes, maxTextBytes) {
+  let count = 0;
+  let totalBytes = 0;
+  let selectedBytes = 0;
+  const isCandidate = /* @__PURE__ */ __name2((name) => {
+    const n = String(name).replace(/\\/g, "/").split("/").pop() || "";
+    const lower = n.toLowerCase();
+    return lower.endsWith(".log") || lower.endsWith(".txt") || /(crash|hs_err|debug|latest|log)\./.test(lower);
+  }, "isCandidate");
+  let files;
+  try {
+    files = unzipSync(new Uint8Array(buf), {
+      filter: /* @__PURE__ */ __name2((f) => {
+        count++;
+        if (count > maxFiles) throw new Error("\u538B\u7F29\u5305\u5185\u6587\u4EF6\u6570\u91CF\u8FC7\u591A");
+        totalBytes += f.originalSize || f.size || 0;
+        if (totalBytes > maxTotalBytes) throw new Error("\u538B\u7F29\u5305\u89E3\u538B\u540E\u4F53\u79EF\u8FC7\u5927\uFF0C\u7591\u4F3C zip \u70B8\u5F39");
+        if (!isCandidate(f.name)) return false;
+        if ((f.originalSize || f.size || 0) > maxPerFileBytes) return false;
+        if (selectedBytes + (f.originalSize || f.size || 0) > maxTextBytes) return false;
+        selectedBytes += f.originalSize || f.size || 0;
+        return true;
+      }, "filter")
+    });
+  } catch (e) {
+    if (e && e.message && /\u538B\u7F29\u5305\u5185\u6587\u4EF6\u6570\u91CF\u8FC7\u591A|\u7591\u4F3C zip \u70B8\u5F39/.test(e.message)) throw e;
+    throw new Error("\u538B\u7F29\u5305\u89E3\u538B\u5931\u8D25: " + (e && e.message || "\u65E0\u6CD5\u89E3\u6790\u6587\u4EF6"));
+  }
+  const decoder = new TextDecoder("utf-8", { fatal: false });
+  const parts = [];
+  let total = 0;
+  for (const [path, data] of Object.entries(files)) {
+    const text2 = decoder.decode(data);
+    const tail = text2.length > maxPerFileBytes ? text2.slice(-maxPerFileBytes) : text2;
+    parts.push(`\u3010\u6587\u4EF6 ${path}\u3011
+${tail}`);
+    total += tail.length + path.length + 6;
+    if (total >= maxTextBytes) break;
+  }
+  return parts.join("\n\n").slice(-maxTextBytes);
+}
+__name(extractLogsFromZip, "extractLogsFromZip");
+__name2(extractLogsFromZip, "extractLogsFromZip");
+async function analyzeLogWithGLM(env, logText, meta) {
+  const system = `\u4F60\u662F\u4E00\u540D\u8D44\u6DF1\u7684 Minecraft \u6A21\u7EC4\u5305\u6280\u672F\u652F\u6301\u5DE5\u7A0B\u5E08\uFF0C\u64C5\u957F\u9605\u8BFB\u6E38\u620F\u65E5\u5FD7\uFF08latest.log / crash-reports \u7B49\uFF09\u5E76\u5B9A\u4F4D\u5D29\u6E83\u539F\u56E0\u3002
+
+\u3010\u786C\u6027\u8981\u6C42\u3011
+1. \u53EA\u4F9D\u636E\u63D0\u4F9B\u7684\u65E5\u5FD7\u5185\u5BB9\u5206\u6790\uFF0C\u7EDD\u4E0D\u7F16\u9020\u65E5\u5FD7\u4E2D\u4E0D\u5B58\u5728\u7684\u4FE1\u606F\u3002
+2. \u5982\u679C\u65E5\u5FD7\u4E0D\u8DB3\u4EE5\u786E\u5B9A\u539F\u56E0\uFF0C\u660E\u786E\u8BF4\u660E\u201C\u6839\u636E\u5F53\u524D\u65E5\u5FD7\u65E0\u6CD5\u5B8C\u5168\u786E\u5B9A\u201D\uFF0C\u5E76\u7ED9\u51FA\u6700\u53EF\u80FD\u7684\u6392\u67E5\u65B9\u5411\u3002
+3. \u8F93\u51FA\u4F7F\u7528\u7B80\u4F53\u4E2D\u6587\u3001\u7ED3\u6784\u6E05\u6670\u3001\u53EF\u76F4\u63A5\u53D1\u9001\u7ED9\u73A9\u5BB6\u3002
+
+\u3010\u8F93\u51FA\u683C\u5F0F\u3011\u7528 Markdown \u8F93\u51FA\u4EE5\u4E0B\u56DB\u4E2A\u7AE0\u8282\uFF08\u5FC5\u987B\u90FD\u542B\uFF09\uFF1A
+- **\u57FA\u7840\u4FE1\u606F**\uFF1A\u4ECE\u65E5\u5FD7\u4E2D\u63D0\u53D6\u7684\u73AF\u5883\u4FE1\u606F\uFF0C\u5305\u62EC\u4F46\u4E0D\u9650\u4E8E\uFF1AMinecraft \u7248\u672C\u3001\u6A21\u7EC4\u52A0\u8F7D\u5668\uFF08Fabric/Forge/Quilt\u53CA\u5176\u7248\u672C\uFF09\u3001Java \u7248\u672C\u3001\u6A21\u7EC4\u6570\u91CF\u3001\u5DF2\u52A0\u8F7D\u7684\u5173\u952E\u6A21\u7EC4\uFF08\u5C24\u5176\u662F\u5F15\u53D1\u95EE\u9898\u7684\u6A21\u7EC4\uFF09\u3001\u64CD\u4F5C\u7CFB\u7EDF\uFF08\u82E5\u65E5\u5FD7\u6709\uFF09\u3002\u6BCF\u9879\u7528\u7B80\u77ED\u65AD\u53E5\uFF0C\u672A\u77E5\u7684\u6807\u6CE8\u201C\u672A\u77E5\u201D\u3002
+- **\u5D29\u6E83\u539F\u56E0**\uFF1A\u7528 2-3 \u53E5\u8BDD\u6982\u62EC\u6700\u53EF\u80FD\u7684\u5D29\u6E83\u539F\u56E0\uFF0C\u6307\u660E\u662F\u54EA\u4E2A\u6A21\u7EC4/\u78C1\u6761\u5F15\u53D1\u3002
+- **\u5173\u952E\u65E5\u5FD7\u8BC1\u636E**\uFF1A\u5217\u51FA 3-6 \u6761\u5BF9\u5224\u65AD\u6700\u6709\u7528\u7684\u65E5\u5FD7\u7247\u6BB5\u3002
+- **\u89E3\u51B3\u65B9\u6848**\uFF1A\u7ED9\u51FA\u5206\u6B65\u9AA4\u3001\u53EF\u64CD\u4F5C\u7684\u89E3\u51B3\u5EFA\u8BAE\uFF08\u5982\u66F4\u65B0/\u5220\u9664\u67D0\u6A21\u7EC4\u3001\u8C03\u6574 Java \u53C2\u6570\u3001\u4FEE\u590D\u7F3A\u5931\u4F9D\u8D56\u7B49\uFF09\u3002
+- **\u5982\u65E0\u6CD5\u786E\u5B9A**\uFF1A\u5217\u51FA\u9700\u8981\u73A9\u5BB6\u8865\u5145\u7684\u4FE1\u606F\u3002`;
+  const user = `\u3010\u9519\u8BEF\u62A5\u544A\u4FE1\u606F\u3011
+\u6E38\u620F\u540D\uFF1A${meta.gamename || "\u672A\u77E5"}
+\u73A9\u5BB6\u63CF\u8FF0\uFF1A${meta.description || "\u65E0"}
+\u4E0A\u4F20\u6587\u4EF6\u540D\uFF1A${meta.fileName || "\u672A\u77E5"}
+
+\u3010\u65E5\u5FD7\u5185\u5BB9\u3011\uFF08\u622A\u53D6\u81EA\u4E0A\u4F20\u7684 zip\uFF09
+${logText}`;
+  return callGLM(env, system, user, parseInt(env.ERROR_REPORT_MAX_TOKENS || "1500", 10));
+}
+__name(analyzeLogWithGLM, "analyzeLogWithGLM");
+__name2(analyzeLogWithGLM, "analyzeLogWithGLM");
+async function handleErrorReportVerify(request, env) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const email = String(body.email || "").trim().toLowerCase();
+    if (!isValidEmail(email)) return json({ error: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E" }, 400);
+    const ip = clientIP(request);
+    const vLimit = parseInt(env.ERROR_REPORT_VERIFY_LIMIT || "5", 10);
+    const vWindow = parseInt(env.ERROR_REPORT_VERIFY_WINDOW || "3600", 10);
+    const rlIp = await checkRateLimit(env, "verify-ip", ip, vLimit, vWindow);
+    if (rlIp) return json({ error: rlIp.error, retry_after: rlIp.retryAfter }, 429, { "Retry-After": String(rlIp.retryAfter) });
+    const rlMail = await checkRateLimit(env, "verify-mail", email, vLimit, vWindow);
+    if (rlMail) return json({ error: rlMail.error, retry_after: rlMail.retryAfter }, 429, { "Retry-After": String(rlMail.retryAfter) });
+    const cdRaw = await env.MODS_KV.get(`er:verify-cd:${email}`);
+    if (cdRaw) return json({ error: "\u53D1\u9001\u8FC7\u4E8E\u9891\u7E41\uFF0C\u8BF7 1 \u5206\u949F\u540E\u518D\u8BD5", retry_after: 60 }, 429, { "Retry-After": "60" });
+    const code = String(Math.floor(1e5 + Math.random() * 9e5));
+    const nickname = String(body.nickname || "\u73A9\u5BB6").trim().slice(0, 20);
+    await env.MODS_KV.put(`er:verify:${email}`, JSON.stringify({ email, code, at: (/* @__PURE__ */ new Date()).toISOString() }), { expirationTtl: 600 });
+    await env.MODS_KV.put(`er:verify-cd:${email}`, "1", { expirationTtl: 60 });
+    try {
+      await sendEmail(
+        env,
+        email,
+        "\u3010\u68A6\u4E4B\u97F5\u3011\u9519\u8BEF\u62A5\u544A\u4E0A\u4F20\u90AE\u7BB1\u9A8C\u8BC1\u7801",
+        `\u4F60\u597D ${nickname} \uFF1A
+
+\u4F60\u6B63\u5728\u68A6\u4E4B\u97F5\u4E0A\u4F20\u9519\u8BEF\u62A5\u544A\uFF0C\u4F60\u7684\u9A8C\u8BC1\u7801\u662F\uFF1A${code}
+
+\u8BF7\u5728 10 \u5206\u949F\u5185\u586B\u5199\u9A8C\u8BC1\u7801\u5E76\u5B8C\u6210\u4E0A\u4F20\u3002\u5982\u975E\u672C\u4EBA\u64CD\u4F5C\uFF0C\u8BF7\u5FFD\u7565\u672C\u90AE\u4EF6\u3002
+
+\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`,
+        verifyEmailHtml(nickname, code)
+      );
+    } catch (e) {
+      await env.MODS_KV.delete(`er:verify:${email}`).catch(() => {
+      });
+      await env.MODS_KV.delete(`er:verify-cd:${email}`).catch(() => {
+      });
+      return json({ error: "\u9A8C\u8BC1\u7801\u90AE\u4EF6\u53D1\u9001\u5931\u8D25\uFF1A" + e.message }, 502);
+    }
+    return json({ ok: true, message: `\u9A8C\u8BC1\u7801\u5DF2\u53D1\u9001\u5230 ${email}\uFF0C\u8BF7\u5728 10 \u5206\u949F\u5185\u586B\u5199` });
+  } catch (e) {
+    return json({ error: e.message || "\u9A8C\u8BC1\u5931\u8D25" }, 500);
+  }
+}
+__name(handleErrorReportVerify, "handleErrorReportVerify");
+__name2(handleErrorReportVerify, "handleErrorReportVerify");
+async function handleErrorReportBind(request, env) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const id = String(body.id || "").trim();
+    const email = String(body.email || "").trim().toLowerCase();
+    const code = String(body.code || "").trim();
+    if (!id) return json({ error: "\u8BF7\u63D0\u4F9B\u7528\u6237 ID" }, 400);
+    if (id.length > 64) return json({ error: "ID \u8FC7\u957F" }, 400);
+    if (!isValidEmail(email)) return json({ error: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E" }, 400);
+    if (!code) return json({ error: "\u8BF7\u586B\u5199\u90AE\u7BB1\u9A8C\u8BC1\u7801" }, 400);
+    const vRaw = await env.MODS_KV.get(`er:verify:${email}`);
+    if (!vRaw) return json({ error: "\u9A8C\u8BC1\u7801\u5DF2\u8FC7\u671F\u6216\u672A\u8BF7\u6C42\uFF0C\u8BF7\u91CD\u65B0\u83B7\u53D6" }, 400);
+    const v = JSON.parse(vRaw);
+    if (v.code !== code) return json({ error: "\u9A8C\u8BC1\u7801\u4E0D\u6B63\u786E" }, 400);
+    await env.MODS_KV.delete(`er:verify:${email}`).catch(() => {
+    });
+    const ttl = parseInt(env.ERROR_REPORT_BIND_TTL_DAYS || "30", 10) * 24 * 3600;
+    await env.MODS_KV.put(`er:bind:${id}`, JSON.stringify({ email, boundAt: (/* @__PURE__ */ new Date()).toISOString() }), { expirationTtl: ttl });
+    return json({ ok: true, id, email, message: "\u90AE\u7BB1\u9A8C\u8BC1\u6210\u529F\uFF0C\u5DF2\u5C06\u7528\u6237 ID \u4E0E\u90AE\u7BB1\u7ED1\u5B9A\uFF0C\u4EE5\u540E\u4E0A\u4F20\u65E0\u9700\u518D\u8F93\u5165\u9A8C\u8BC1\u7801", ttl_days: parseInt(env.ERROR_REPORT_BIND_TTL_DAYS || "30", 10) });
+  } catch (e) {
+    return json({ error: e.message || "\u7ED1\u5B9A\u5931\u8D25" }, 500);
+  }
+}
+__name(handleErrorReportBind, "handleErrorReportBind");
+__name2(handleErrorReportBind, "handleErrorReportBind");
+async function handleErrorReportUpload(request, env, ctx) {
+  try {
+    const ip = clientIP(request);
+    const limit = parseInt(env.ERROR_REPORT_RATE_LIMIT || "3", 10);
+    const windowSec = parseInt(env.ERROR_REPORT_RATE_WINDOW || "3600", 10);
+    const rlIp = await checkRateLimit(env, "ip", ip, limit, windowSec);
+    if (rlIp) return json({ error: rlIp.error, retry_after: rlIp.retryAfter }, 429, { "Retry-After": String(rlIp.retryAfter) });
+    const form = await request.formData().catch(() => null);
+    if (!form) return json({ error: "\u4EC5\u652F\u6301 multipart/form-data \u4E0A\u4F20" }, 400);
+    const file = form.get("file");
+    if (!file || typeof file === "string") return json({ error: "\u672A\u6536\u5230\u6587\u4EF6\u5B57\u6BB5 file" }, 400);
+    const email = String(form.get("email") || "").trim().toLowerCase();
+    if (!isValidEmail(email)) return json({ error: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E" }, 400);
+    const uid = String(form.get("id") || "").trim();
+    const code = String(form.get("code") || "").trim();
+    let verifiedVia = null;
+    if (uid && uid.length <= 64) {
+      const bindRaw = await env.MODS_KV.get(`er:bind:${uid}`);
+      if (bindRaw) {
+        const b = JSON.parse(bindRaw);
+        if (b.email === email) verifiedVia = "bind";
+      }
+    }
+    if (!verifiedVia) {
+      if (!code) return json({ error: "\u8BF7\u5148\u83B7\u53D6\u5E76\u586B\u5199\u90AE\u7BB1\u9A8C\u8BC1\u7801\uFF0C\u6216\u5148\u5B8C\u6210\u90AE\u7BB1\u7ED1\u5B9A" }, 400);
+      const vRaw = await env.MODS_KV.get(`er:verify:${email}`);
+      if (!vRaw) return json({ error: "\u9A8C\u8BC1\u7801\u5DF2\u8FC7\u671F\u6216\u672A\u8BF7\u6C42\uFF0C\u8BF7\u91CD\u65B0\u83B7\u53D6" }, 400);
+      const v = JSON.parse(vRaw);
+      if (v.code !== code) return json({ error: "\u9A8C\u8BC1\u7801\u4E0D\u6B63\u786E" }, 400);
+      await env.MODS_KV.delete(`er:verify:${email}`).catch(() => {
+      });
+      if (uid && uid.length <= 64) {
+        const ttl = parseInt(env.ERROR_REPORT_BIND_TTL_DAYS || "30", 10) * 24 * 3600;
+        await env.MODS_KV.put(`er:bind:${uid}`, JSON.stringify({ email, boundAt: (/* @__PURE__ */ new Date()).toISOString() }), { expirationTtl: ttl });
+      }
+      verifiedVia = "code";
+    }
+    const nickname = String(form.get("nickname") || "\u73A9\u5BB6").trim().slice(0, 20);
+    const gamename = String(form.get("gamename") || "").trim().slice(0, 40);
+    const description = String(form.get("description") || "").trim().slice(0, 2e3);
+    const name = String(file.name || "");
+    if (!/\.zip$/i.test(name)) return json({ error: "\u4EC5\u652F\u6301 .zip \u538B\u7F29\u5305" }, 400);
+    const maxMB = parseInt(env.ERROR_REPORT_MAX_MB || "20", 10);
+    const maxBytes = maxMB * 1024 * 1024;
+    const buf = await file.arrayBuffer();
+    if (buf.byteLength <= 0) return json({ error: "\u6587\u4EF6\u4E3A\u7A7A" }, 400);
+    if (buf.byteLength > maxBytes) return json({ error: `\u6587\u4EF6\u8D85\u8FC7\u5927\u5C0F\u4E0A\u9650\uFF08${maxMB}MB\uFF09` }, 400);
+    const rlMail = await checkRateLimit(env, "mail", email, limit, windowSec);
+    if (rlMail) return json({ error: rlMail.error, retry_after: rlMail.retryAfter }, 429, { "Retry-After": String(rlMail.retryAfter) });
+    const queueRaw = await env.MODS_KV.get("er:queue");
+    const queue = queueRaw ? JSON.parse(queueRaw) : [];
+    const maxQueue = parseInt(env.ERROR_REPORT_MAX_QUEUE || "20", 10);
+    if (queue.length >= maxQueue) return json({ error: "\u5F53\u524D\u5206\u6790\u4EFB\u52A1\u7E41\u5FD9\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5" }, 429);
+    const id = "ER" + Date.now().toString(36).toUpperCase() + randomHex(4).toUpperCase();
+    const token = randomHex(24);
+    const nowIso = (/* @__PURE__ */ new Date()).toISOString();
+    const record = { id, token, uid: uid || null, email, nickname, gamename, description, fileName: name, size: buf.byteLength, status: "queued", createdAt: nowIso, updatedAt: nowIso, result: null, error: null, ticketId: null, attempts: 0, verifiedVia };
+    await env.MODS_R2.put(`error-reports/${id}/original.zip`, buf, {
+      httpMetadata: { contentType: "application/zip" },
+      customMetadata: { email, uploadedAt: nowIso }
+    });
+    await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+    queue.push(id);
+    await env.MODS_KV.put("er:queue", JSON.stringify(queue.slice(-100)));
+    return json({ ok: true, report_id: id, status: "queued", message: "\u4E0A\u4F20\u6210\u529F\uFF0C\u5DF2\u5165\u961F\u7B49\u5F85\u5206\u6790\uFF0C\u7ED3\u679C\u5C06\u53D1\u9001\u5230\u4F60\u7684\u90AE\u7BB1\u5E76\u53EF\u901A\u8FC7\u67E5\u8BE2\u63A5\u53E3\u83B7\u53D6", poll: { method: "GET", path: `/api/error-reports/${id}`, token }, ttl_hours: 168 });
+  } catch (e) {
+    return json({ error: e.message || "\u4E0A\u4F20\u5931\u8D25" }, e.status || 500);
+  }
+}
+__name(handleErrorReportUpload, "handleErrorReportUpload");
+__name2(handleErrorReportUpload, "handleErrorReportUpload");
+async function handleErrorReportLookup(request, env, id) {
+  const raw = await env.MODS_KV.get(`er:report:${id}`);
+  if (!raw) return json({ error: "\u9519\u8BEF\u62A5\u544A\u4E0D\u5B58\u5728\u6216\u5DF2\u8FC7\u671F" }, 404);
+  const record = JSON.parse(raw);
+  const q = new URL(request.url);
+  const token = request.headers.get("X-Report-Token") || q.searchParams.get("token") || "";
+  if (token !== record.token) return json({ error: "token \u4E0D\u6B63\u786E\uFF0C\u65E0\u6CD5\u67E5\u8BE2\u8BE5\u62A5\u544A" }, 403);
+  return json({ ok: true, report_id: record.id, status: record.status, created_at: record.createdAt, updated_at: record.updatedAt, ticket_id: record.ticketId, result: record.status === "done" ? record.result : null, error: record.error });
+}
+__name(handleErrorReportLookup, "handleErrorReportLookup");
+__name2(handleErrorReportLookup, "handleErrorReportLookup");
+async function deleteErrorReportR2(env, id) {
+  try {
+    await env.MODS_R2.delete(`error-reports/${id}/original.zip`);
+  } catch (_) {
+  }
+}
+__name(deleteErrorReportR2, "deleteErrorReportR2");
+__name2(deleteErrorReportR2, "deleteErrorReportR2");
+async function processErrorReport(env, id) {
+  try {
+    const raw = await env.MODS_KV.get(`er:report:${id}`);
+    if (!raw) return;
+    const record = JSON.parse(raw);
+    if (record.status !== "queued") return;
+    record.status = "processing";
+    record.attempts = (record.attempts || 0) + 1;
+    record.processingAt = (/* @__PURE__ */ new Date()).toISOString();
+    record.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+    await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+    const obj = await env.MODS_R2.get(`error-reports/${id}/original.zip`);
+    if (!obj) throw new Error("\u539F\u59CB\u6587\u4EF6\u4E0D\u5B58\u5728");
+    const buf = await obj.arrayBuffer();
+    const maxTotal = parseInt(env.ERROR_REPORT_MAX_UNCOMPRESSED_MB || "200", 10) * 1024 * 1024;
+    const maxPer = parseInt(env.ERROR_REPORT_MAX_FILE_MB || "25", 10) * 1024 * 1024;
+    const maxText = parseInt(env.ERROR_REPORT_MAX_TEXT || "120000", 10);
+    const logText = extractLogsFromZip(buf, 200, maxTotal, maxPer, maxText);
+    if (!logText) throw new Error("\u538B\u7F29\u5305\u5185\u672A\u627E\u5230\u53EF\u5206\u6790\u7684\u65E5\u5FD7\u6587\u4EF6\uFF08.log/.txt/\u5D29\u6E83\u62A5\u544A\uFF09");
+    const result = await analyzeLogWithGLM(env, logText, record);
+    record.status = "done";
+    record.result = result;
+    record.error = null;
+    record.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+    try {
+      const tid = ticketId(/* @__PURE__ */ new Date());
+      const ticket = { id: tid, nickname: record.nickname || "\u73A9\u5BB6", gamename: record.gamename || "", email: record.email, content: `\u3010\u9519\u8BEF\u62A5\u544A\u81EA\u52A8\u5206\u6790\u3011
+\u6587\u4EF6\u540D\uFF1A${record.fileName}
+\u73A9\u5BB6\u63CF\u8FF0\uFF1A${record.description || "\u65E0"}
+
+${record.result}`, status: "auto", source: "error-report", errorReportId: id, createdAt: (/* @__PURE__ */ new Date()).toISOString(), replies: [{ from: "ai", auto: true, content: record.result, at: (/* @__PURE__ */ new Date()).toISOString() }] };
+      await env.MODS_KV.put(`ticket:${tid}`, JSON.stringify(ticket));
+      const indexRaw = await env.MODS_KV.get("ticket:index");
+      const index = indexRaw ? JSON.parse(indexRaw) : [];
+      index.unshift(tid);
+      await env.MODS_KV.put("ticket:index", JSON.stringify(index.slice(0, 300)));
+      record.ticketId = tid;
+      const mailBody = `\u4F60\u597D ${record.nickname || "\u73A9\u5BB6"}\uFF1A
+
+\u6211\u4EEC\u5DF2\u901A\u8FC7 AI \u5206\u6790\u4E86\u4F60\u4E0A\u4F20\u7684\u9519\u8BEF\u62A5\u544A\uFF08${record.fileName}\uFF09\uFF0C\u5206\u6790\u7ED3\u679C\u5982\u4E0B\uFF1A
+
+${record.result}
+
+\u5982\u95EE\u9898\u4ECD\u672A\u89E3\u51B3\uFF0C\u6B22\u8FCE\u5230 ${env.BASE_URL || "https://releases.camzy.uno"}/ticket.html \u63D0\u4EA4\u5DE5\u5355\u7EE7\u7EED\u6C9F\u901A\u3002
+
+\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`;
+      await sendEmail(env, record.email, "\u3010\u68A6\u4E4B\u97F5\u3011\u4F60\u7684\u9519\u8BEF\u62A5\u544A\u5206\u6790\u7ED3\u679C", mailBody, emailShell("\u9519\u8BEF\u62A5\u544A\u5206\u6790\u7ED3\u679C", mdToHtml(record.result)));
+    } catch (e) {
+      console.error("[error-report-mail]", e.message);
+      record.emailError = e.message;
+    }
+    await deleteErrorReportR2(env, id);
+    record.r2DeletedAt = (/* @__PURE__ */ new Date()).toISOString();
+    await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+  } catch (e) {
+    console.error("[error-report]", id, e.message);
+    try {
+      const raw = await env.MODS_KV.get(`er:report:${id}`);
+      if (raw) {
+        const record = JSON.parse(raw);
+        record.status = "error";
+        record.error = e.message || "\u5206\u6790\u5931\u8D25";
+        record.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+        await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+      }
+    } catch (_) {
+    }
+  }
+}
+__name(processErrorReport, "processErrorReport");
+__name2(processErrorReport, "processErrorReport");
+async function drainErrorReportQueue(env, ctx) {
+  try {
+    const lockRaw = await env.MODS_KV.get("er:lock");
+    if (lockRaw) return;
+    const budgetMs = parseInt(env.ERROR_REPORT_CRON_BUDGET_MS || "720000", 10);
+    const maxPerRun = parseInt(env.ERROR_REPORT_CRON_MAX || "2", 10);
+    const maxRetry = parseInt(env.ERROR_REPORT_MAX_RETRY || "2", 10);
+    const leaseMs = parseInt(env.ERROR_REPORT_LEASE_MS || "900000", 10);
+    await env.MODS_KV.put("er:lock", "1", { expirationTtl: Math.ceil(budgetMs / 1e3) + 120 });
+    const deadline = Date.now() + budgetMs;
+    let queue = [];
+    const loadQueue = /* @__PURE__ */ __name2(async () => {
+      const raw = await env.MODS_KV.get("er:queue");
+      queue = raw ? JSON.parse(raw) : [];
+    }, "loadQueue");
+    const saveQueue = /* @__PURE__ */ __name2(() => env.MODS_KV.put("er:queue", JSON.stringify(queue.slice(-100))), "saveQueue");
+    await loadQueue();
+    let processed = 0;
+    while (queue.length && processed < maxPerRun && Date.now() < deadline) {
+      const id = queue.shift();
+      const raw = await env.MODS_KV.get(`er:report:${id}`);
+      let rec = raw ? JSON.parse(raw) : null;
+      if (rec) {
+        if (rec.status === "processing") {
+          const since = rec.processingAt ? Date.now() - new Date(rec.processingAt).getTime() : Infinity;
+          if (since < leaseMs) {
+            queue.unshift(id);
+            await saveQueue();
+            break;
+          }
+          rec.status = "queued";
+        }
+        if (rec.status === "error") {
+          if ((rec.attempts || 0) >= maxRetry) {
+            await deleteErrorReportR2(env, id);
+            await saveQueue();
+            continue;
+          }
+          rec.status = "queued";
+        }
+        if (rec.status === "queued") {
+          await processErrorReport(env, id);
+          processed++;
+          const afterRaw = await env.MODS_KV.get(`er:report:${id}`);
+          const after = afterRaw ? JSON.parse(afterRaw) : null;
+          if (after && after.status === "error" && (after.attempts || 0) < maxRetry) {
+            queue.push(id);
+          }
+        }
+      }
+      await saveQueue();
+    }
+  } catch (e) {
+    console.error("[error-report-drain]", e.message);
+  } finally {
+    try {
+      await env.MODS_KV.delete("er:lock");
+    } catch (_) {
+    }
+  }
+}
+__name(drainErrorReportQueue, "drainErrorReportQueue");
+__name2(drainErrorReportQueue, "drainErrorReportQueue");
+__name22(drainErrorReportQueue, "drainErrorReportQueue");
 async function handleAdminTickets(env) {
   const indexRaw = await env.MODS_KV.get("ticket:index");
   const ids = indexRaw ? JSON.parse(indexRaw) : [];
@@ -1778,12 +3387,20 @@ async function handleAdminTickets(env) {
   return json({ tickets });
 }
 __name(handleAdminTickets, "handleAdminTickets");
+__name2(handleAdminTickets, "handleAdminTickets");
+__name22(handleAdminTickets, "handleAdminTickets");
+__name222(handleAdminTickets, "handleAdminTickets");
+__name2222(handleAdminTickets, "handleAdminTickets");
 async function handleAdminTicketDetail(env, id) {
   const raw = await env.MODS_KV.get(`ticket:${id}`);
   if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
   return json({ ticket: JSON.parse(raw) });
 }
 __name(handleAdminTicketDetail, "handleAdminTicketDetail");
+__name2(handleAdminTicketDetail, "handleAdminTicketDetail");
+__name22(handleAdminTicketDetail, "handleAdminTicketDetail");
+__name222(handleAdminTicketDetail, "handleAdminTicketDetail");
+__name2222(handleAdminTicketDetail, "handleAdminTicketDetail");
 async function handleAdminTicketReply(request, env, id) {
   try {
     const raw = await env.MODS_KV.get(`ticket:${id}`);
@@ -1793,12 +3410,24 @@ async function handleAdminTicketReply(request, env, id) {
     const content = String(body.content || "").trim();
     if (!content) return json({ error: "\u56DE\u590D\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A" }, 400);
     ticket.replies = ticket.replies || [];
-    ticket.replies.push({ from: "admin", content, at: new Date().toISOString() });
+    ticket.replies.push({ from: "admin", content, at: (/* @__PURE__ */ new Date()).toISOString() });
     if (ticket.status !== "closed") ticket.status = "replied";
     await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
     try {
-      await sendEmail(env, ticket.email, `【\u68A6\u4E4B\u97F5\u5DE5\u5355】\u7BA1\u7406\u5458\u56DE\u590D\u4E86\u4F60\u7684\u5DE5\u5355 ${id}`,
-        `\u4F60\u597D ${ticket.nickname} \uFF1A\n\n\u7BA1\u7406\u5458\u56DE\u590D\u4E86\u4F60\u7684\u5DE5\u5355 ${id}\uFF1A\n\n${content}\n\n\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`);
+      const body2 = `\u4F60\u597D ${ticket.nickname} \uFF1A
+
+\u7BA1\u7406\u5458\u56DE\u590D\u4E86\u4F60\u7684\u5DE5\u5355 ${id}\uFF1A
+
+${content}
+
+\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`;
+      await sendEmail(
+        env,
+        ticket.email,
+        `\u3010\u68A6\u4E4B\u97F5\u5DE5\u5355\u3011\u7BA1\u7406\u5458\u56DE\u590D\u4E86\u4F60\u7684\u5DE5\u5355 ${id}`,
+        body2,
+        emailShell("\u7BA1\u7406\u5458\u56DE\u590D", mdToHtml(body2))
+      );
     } catch (e) {
       console.error("[ticket-reply-mail]", e.message);
     }
@@ -1808,36 +3437,565 @@ async function handleAdminTicketReply(request, env, id) {
   }
 }
 __name(handleAdminTicketReply, "handleAdminTicketReply");
+__name2(handleAdminTicketReply, "handleAdminTicketReply");
+__name22(handleAdminTicketReply, "handleAdminTicketReply");
+__name222(handleAdminTicketReply, "handleAdminTicketReply");
+__name2222(handleAdminTicketReply, "handleAdminTicketReply");
 async function handleAdminTicketClose(env, id) {
   const raw = await env.MODS_KV.get(`ticket:${id}`);
   if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
   const ticket = JSON.parse(raw);
   ticket.status = "closed";
   await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
+  try {
+    const body = `\u4F60\u597D ${ticket.nickname} \uFF1A
+
+\u4F60\u7684\u5DE5\u5355 ${id} \u5DF2\u7ECF\u5904\u7406\u5B8C\u6210\u5E76\u5173\u95ED\u3002
+
+\u5982\u679C\u4F60\u8FD8\u6709\u5176\u4ED6\u95EE\u9898\uFF0C\u968F\u65F6\u53EF\u4EE5\u518D\u6B21\u63D0\u4EA4\u65B0\u5DE5\u5355\u3002
+
+\u611F\u8C22\u4F60\u7684\u53CD\u9988\uFF01
+
+\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`;
+    await sendEmail(
+      env,
+      ticket.email,
+      `\u3010\u68A6\u4E4B\u97F5\u5DE5\u5355\u3011\u5DE5\u5355 ${id} \u5DF2\u5173\u95ED`,
+      body,
+      emailShell("\u5DE5\u5355\u5DF2\u5173\u95ED", mdToHtml(body))
+    );
+  } catch (e) {
+    console.error("[ticket-close-mail]", e.message);
+  }
   return json({ ok: true, ticket });
 }
 __name(handleAdminTicketClose, "handleAdminTicketClose");
+__name2(handleAdminTicketClose, "handleAdminTicketClose");
+__name22(handleAdminTicketClose, "handleAdminTicketClose");
+__name222(handleAdminTicketClose, "handleAdminTicketClose");
+__name2222(handleAdminTicketClose, "handleAdminTicketClose");
+function bigrams(s) {
+  const clean = String(s || "").toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]+/g, "");
+  const set = /* @__PURE__ */ new Set();
+  for (let i2 = 0; i2 < clean.length - 1; i2++) set.add(clean.slice(i2, i2 + 2));
+  return set;
+}
+__name(bigrams, "bigrams");
+__name2(bigrams, "bigrams");
+__name22(bigrams, "bigrams");
+__name222(bigrams, "bigrams");
+function stripHtml(html) {
+  return String(html || "").replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<nav[\s\S]*?<\/nav>/gi, " ").replace(/<header[\s\S]*?<\/header>/gi, " ").replace(/<footer[\s\S]*?<\/footer>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, " ").trim();
+}
+__name(stripHtml, "stripHtml");
+__name2(stripHtml, "stripHtml");
+__name22(stripHtml, "stripHtml");
+__name222(stripHtml, "stripHtml");
+async function fetchWikiContext(env, question) {
+  const base = (env.WIKI_BASE || "https://camzy.uno").replace(/\/$/, "");
+  try {
+    const sm = await (await fetch(`${base}/sitemap.xml`, { cf: { cacheTtl: 600 } })).text();
+    const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    const pages = locs.map((u) => {
+      try {
+        return new URL(u).pathname;
+      } catch (_) {
+        return null;
+      }
+    }).filter((p) => p && (/^\/posts\/[^/]+\/$/.test(p) || /^\/wiki\/[^/]+\/$/.test(p)));
+    if (!pages.length) return { text: "", sources: [] };
+    const qset = bigrams(question);
+    const scored = [];
+    for (const p of pages) {
+      let text3 = "";
+      try {
+        text3 = stripHtml(await (await fetch(base + p)).text());
+      } catch (_) {
+        continue;
+      }
+      if (!text3) continue;
+      let score = 0;
+      for (const g of qset) if (text3.includes(g)) score++;
+      scored.push({ path: p, text: text3, score });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    const top = scored.filter((s) => s.score > 0).slice(0, 4);
+    const chosen = top.length ? top : scored.slice(0, 3);
+    let text2 = "", sources = [];
+    for (const c of chosen) {
+      if (text2.length >= 14e3) break;
+      text2 += `
+
+\u3010\u9875\u9762 ${base}${c.path}\u3011
+${c.text.slice(0, 4e3)}`;
+      sources.push(base + c.path);
+    }
+    return { text: text2.trim(), sources };
+  } catch (e) {
+    console.error("[wiki-context]", e.message);
+    return { text: "", sources: [] };
+  }
+}
+__name(fetchWikiContext, "fetchWikiContext");
+__name2(fetchWikiContext, "fetchWikiContext");
+__name22(fetchWikiContext, "fetchWikiContext");
+__name222(fetchWikiContext, "fetchWikiContext");
+async function callGLM(env, system, user, maxTokens = 1200) {
+  const key = env.GLM_API_KEY;
+  if (!key) throw new Error("\u672A\u914D\u7F6E\u667A\u8C31 API Key\uFF08GLM_API_KEY\uFF09");
+  let budget = maxTokens;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await fetch("https://open.bigmodel.cn/api/paas/v4/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model: env.GLM_MODEL || "glm-4.7-flash",
+        thinking: { type: "enabled" },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user }
+        ],
+        temperature: 0.3,
+        max_tokens: budget
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error && (data.error.message || data.error.code) || `\u667A\u8C31\u63A5\u53E3\u9519\u8BEF (${res.status})`);
+    const msg = data.choices && data.choices[0] && data.choices[0].message;
+    const content = msg && (msg.content || msg.reasoning_content);
+    if (content) return content;
+    if (data.choices && data.choices[0] && data.choices[0].finish_reason === "length") {
+      budget = Math.min(12e3, Math.max(budget * 3, 4e3));
+      continue;
+    }
+    break;
+  }
+  throw new Error("\u667A\u8C31\u672A\u8FD4\u56DE\u5185\u5BB9");
+}
+__name(callGLM, "callGLM");
+__name2(callGLM, "callGLM");
+__name22(callGLM, "callGLM");
+__name222(callGLM, "callGLM");
+__name2222(callGLM, "callGLM");
+async function handleAdminTicketAi(request, env, id) {
+  try {
+    const raw = await env.MODS_KV.get(`ticket:${id}`);
+    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+    const t = JSON.parse(raw);
+    const ctx = await fetchWikiContext(env, `${t.gamename || ""} ${t.content || ""}`);
+    const system = `\u4F60\u662F\u300C\u68A6\u4E4B\u97F5\u300DMinecraft \u6A21\u7EC4\u5305\u5B98\u65B9\u5BA2\u670D\uFF0C\u8D1F\u8D23\u57FA\u4E8E\u77E5\u8BC6\u5E93\u64B0\u5199\u5DE5\u5355\u56DE\u590D\u8349\u7A3F\u3002
+
+\u3010\u786C\u6027\u8981\u6C42\u3011
+1. \u53EA\u80FD\u4F9D\u636E\u4E0B\u65B9\u3010\u77E5\u8BC6\u5E93\u3011\u63D0\u4F9B\u7684\u5185\u5BB9\u56DE\u7B54\uFF0C\u7981\u6B62\u7F16\u9020\u3001\u81C6\u6D4B\u4EFB\u4F55\u77E5\u8BC6\u5E93\u4E2D\u6CA1\u6709\u7684\u4FE1\u606F\u3002
+2. \u5982\u679C\u77E5\u8BC6\u5E93\u5185\u5BB9\u4E0D\u8DB3\u4EE5\u56DE\u7B54\u7528\u6237\u95EE\u9898\uFF0C\u5FC5\u987B\u5728\u56DE\u590D\u5F00\u5934\u660E\u786E\u8BF4\u660E\u300C\u77E5\u8BC6\u5E93\u6682\u672A\u6536\u5F55\u8BE5\u95EE\u9898\u7684\u5B8C\u6574\u89E3\u7B54\u300D\uFF0C\u5E76\u7ED9\u51FA\u53EF\u64CD\u4F5C\u5EFA\u8BAE\uFF08\u4F8B\u5982\u67E5\u770B wiki\u3001\u8865\u5145\u622A\u56FE\u3001\u7531\u4EBA\u5DE5\u5904\u7406\uFF09\uFF0C\u7EDD\u5BF9\u4E0D\u8981\u5F3A\u884C\u7F16\u9020\u7B54\u6848\u3002
+3. \u7ED3\u5408\u5DE5\u5355\u91CC\u7684\u6E38\u620F\u540D\u4E0E\u95EE\u9898\u63CF\u8FF0\uFF0C\u7528\u7B80\u4F53\u4E2D\u6587\u3001\u793C\u8C8C\u3001\u6E05\u6670\u7684\u53E3\u543B\u7ED9\u73A9\u5BB6\u5199\u4E00\u6BB5\u53EF\u76F4\u63A5\u53D1\u9001\u7684\u56DE\u590D\u3002
+4. \u8F93\u51FA\u7EAF\u6587\u672C\u56DE\u590D\u8349\u7A3F\uFF08\u53EF\u5305\u542B Markdown \u6392\u7248\uFF1A**\u52A0\u7C97**\u3001- \u5217\u8868\u7B49\uFF09\uFF0C\u4E0D\u8981\u5199\u300C\u56DE\u590D\uFF1A\u300D\u4E4B\u7C7B\u7684\u524D\u7F00\u6807\u9898\u3002`;
+    const user = `\u3010\u73A9\u5BB6\u5DE5\u5355\u3011
+\u7B80\u79F0\uFF1A${t.nickname || ""}
+\u6E38\u620F\u540D\uFF1A${t.gamename || ""}
+\u90AE\u7BB1\uFF1A${t.email || ""}
+\u95EE\u9898\u5185\u5BB9\uFF1A
+${t.content || ""}
+
+\u3010\u77E5\u8BC6\u5E93\u3011\uFF08\u6765\u6E90\u4E8E wiki\uFF0C\u4EC5\u5728\u4EE5\u4E0B\u5185\u5BB9\u8303\u56F4\u5185\u4F5C\u7B54\uFF09
+${ctx.text || "\uFF08\u5F53\u524D\u77E5\u8BC6\u5E93\u4E3A\u7A7A\uFF09"}`;
+    const draft = await callGLM(env, system, user);
+    return json({ ok: true, draft, model: env.GLM_MODEL || "glm-4.7-flash", sources: ctx.sources });
+  } catch (e) {
+    return json({ error: e.message || "AI \u751F\u6210\u5931\u8D25" }, 500);
+  }
+}
+__name(handleAdminTicketAi, "handleAdminTicketAi");
+__name2(handleAdminTicketAi, "handleAdminTicketAi");
+__name22(handleAdminTicketAi, "handleAdminTicketAi");
+__name222(handleAdminTicketAi, "handleAdminTicketAi");
+async function callGLMRouter(env, ticket, wikiText) {
+  const system = `\u4F60\u662F\u300C\u68A6\u4E4B\u97F5\u300DMinecraft \u6A21\u7EC4\u5305\u5B98\u65B9\u5BA2\u670D\u667A\u80FD\u4F53\uFF0C\u8D1F\u8D23\u5224\u65AD\u5DE5\u5355\u80FD\u5426\u4EC5\u4F9D\u636E\u77E5\u8BC6\u5E93\u81EA\u52A8\u89E3\u7B54\u3002
+
+\u3010\u5224\u5B9A\u89C4\u5219\u3011
+- action \u4E3A "auto"\uFF1A\u4EC5\u5F53\u3010\u77E5\u8BC6\u5E93\u3011\u5185\u5BB9\u80FD\u5B8C\u6574\u3001\u660E\u786E\u5730\u56DE\u7B54\u73A9\u5BB6\u7684\u57FA\u7840\u95EE\u9898\uFF08\u4F8B\u5982\u5B89\u88C5\u65B9\u6CD5\u3001\u914D\u7F6E\u6B65\u9AA4\u3001\u5E38\u89C1\u95EE\u9898\uFF09\uFF0C\u4E14\u4F60\u636E\u6B64\u751F\u6210\u4E86\u5B8C\u6574\u3001\u53EF\u76F4\u63A5\u53D1\u9001\u7684\u56DE\u590D\u3002
+- \u53EA\u8981\u7B26\u5408\u4EE5\u4E0B\u4EFB\u4E00\u60C5\u51B5\uFF0Caction \u5C31\u5FC5\u987B\u4E3A "manual"\uFF08\u8F6C\u4EBA\u5DE5\u5904\u7406\uFF09\uFF1A
+  1. \u77E5\u8BC6\u5E93\u5185\u5BB9\u4E0D\u8DB3\u4EE5\u56DE\u7B54\uFF0C\u6216\u95EE\u9898\u590D\u6742\u3001\u4E13\u4E1A\u3001\u9700\u8981\u5177\u4F53\u6392\u9519\uFF1B
+  2. \u6D89\u53CA\u73A9\u5BB6\u4E2A\u4EBA\u8D26\u53F7\u3001\u8D2D\u4E70\u3001\u9000\u6B3E\u3001\u9690\u79C1\u3001\u5B58\u6863\u6062\u590D\u7B49\u9700\u7BA1\u7406\u5458\u4ECB\u5165\u7684\u4FE1\u606F\uFF1B
+  3. \u95EE\u9898\u63CF\u8FF0\u542B\u7CCA\u3001\u7F3A\u5C11\u5173\u952E\u4FE1\u606F\u3001\u9700\u8981\u8FDB\u4E00\u6B65\u6C9F\u901A\u786E\u8BA4\uFF1B
+  4. \u5C5E\u4E8E\u5EFA\u8BAE\u53CD\u9988\u3001\u6295\u8BC9\u3001\u8FB1\u9A82\u3001\u7D27\u6025\u6C42\u52A9\u7B49\u4E0D\u5B9C\u81EA\u52A8\u56DE\u590D\u7684\u5185\u5BB9\u3002
+
+\u3010\u786C\u6027\u8981\u6C42\u3011
+- \u53EA\u80FD\u4F9D\u636E\u3010\u77E5\u8BC6\u5E93\u3011\u5185\u5BB9\u4F5C\u7B54\uFF0C\u7981\u6B62\u7F16\u9020\u3001\u81C6\u6D4B\u4EFB\u4F55\u77E5\u8BC6\u5E93\u4E2D\u6CA1\u6709\u7684\u4FE1\u606F\u3002
+- \u77E5\u8BC6\u5E93\u4FE1\u606F\u4E0D\u8DB3\u65F6\u7EDD\u4E0D\u80FD\u9009 "auto"\uFF0C\u5B81\u53EF\u8F6C\u4EBA\u5DE5\u3002
+
+\u3010\u8F93\u51FA\u3011
+\u53EA\u8F93\u51FA\u4E00\u4E2A JSON \u5BF9\u8C61\uFF08\u4E0D\u8981\u8F93\u51FA\u4EFB\u4F55\u5176\u4ED6\u6587\u5B57\u6216\u4EE3\u7801\u5757\u6807\u8BB0\uFF09\uFF1A
+{"action":"auto" \u6216 "manual","reply":"\u5F53 action \u4E3A auto \u65F6\u7ED9\u51FA\u5B8C\u6574\u56DE\u590D\u8349\u7A3F\uFF1B\u5426\u5219\u4E3A\u7A7A\u5B57\u7B26\u4E32"}
+
+auto \u65F6 reply \u8981\u6C42\uFF1A\u7528\u7B80\u4F53\u4E2D\u6587\u3001\u793C\u8C8C\u3001\u6E05\u6670\u7684\u53E3\u543B\uFF0C\u53EF\u76F4\u63A5\u53D1\u9001\uFF1B\u4EE5\u73A9\u5BB6\u79F0\u547C\u5F00\u5934\uFF1B\u53EF\u542B Markdown \u6392\u7248\u3002`;
+  const user = `\u3010\u73A9\u5BB6\u5DE5\u5355\u3011
+\u6E38\u620F\u540D\uFF1A${ticket.gamename || ""}
+\u95EE\u9898\u5185\u5BB9\uFF1A
+${ticket.content || ""}
+
+\u3010\u77E5\u8BC6\u5E93\u3011\uFF08\u6765\u6E90\u4E8E wiki\uFF0C\u4EC5\u53EF\u5728\u4EE5\u4E0B\u5185\u5BB9\u8303\u56F4\u5185\u4F5C\u7B54\uFF09
+${wikiText || "\uFF08\u77E5\u8BC6\u5E93\u4E3A\u7A7A\uFF09"}`;
+  const content = await callGLM(env, system, user, 2e3);
+  const m = String(content || "").match(/\{[\s\S]*\}/);
+  if (!m) throw new Error("AI \u672A\u8FD4\u56DE\u6709\u6548\u5224\u5B9A\u7ED3\u679C");
+  let parsed = {};
+  try {
+    parsed = JSON.parse(m[0]);
+  } catch (_) {
+    parsed = {};
+  }
+  const action = parsed.action === "auto" ? "auto" : "manual";
+  return { action, reply: String(parsed.reply || "").trim() };
+}
+__name(callGLMRouter, "callGLMRouter");
+__name2(callGLMRouter, "callGLMRouter");
+__name22(callGLMRouter, "callGLMRouter");
+__name222(callGLMRouter, "callGLMRouter");
+__name2222(callGLMRouter, "callGLMRouter");
+async function notifyAdminNewTicket(env, ticket) {
+  const notifyEmails = await getNotifyEmails(env);
+  for (const mail of notifyEmails) {
+    if (!mail) continue;
+    try {
+      const body = `\u65B0\u5DE5\u5355 ${ticket.id}
+\u7B80\u79F0\uFF1A${ticket.nickname}
+\u6E38\u620F\u540D\uFF1A${ticket.gamename}
+\u90AE\u7BB1\uFF1A${ticket.email}
+\u65F6\u95F4\uFF1A${ticket.createdAt}
+
+\u7559\u8A00\u5185\u5BB9\uFF1A
+${ticket.content}`;
+      await sendEmail(
+        env,
+        mail,
+        `\u3010\u65B0\u5DE5\u5355\u3011${ticket.id} \u6765\u81EA ${ticket.nickname}`,
+        body,
+        notifyAdminEmailHtml(ticket.id, ticket)
+      );
+    } catch (e) {
+      console.error("[ticket-notify-admin]", mail, e.message);
+    }
+  }
+}
+__name(notifyAdminNewTicket, "notifyAdminNewTicket");
+__name2(notifyAdminNewTicket, "notifyAdminNewTicket");
+__name22(notifyAdminNewTicket, "notifyAdminNewTicket");
+__name222(notifyAdminNewTicket, "notifyAdminNewTicket");
+__name2222(notifyAdminNewTicket, "notifyAdminNewTicket");
+async function autoProcessTicket(env, id) {
+  try {
+    const raw = await env.MODS_KV.get(`ticket:${id}`);
+    if (!raw) return;
+    const t = JSON.parse(raw);
+    if (t.status !== "new") return;
+    if (!env.GLM_API_KEY) {
+      await notifyAdminNewTicket(env, t);
+      return;
+    }
+    const wiki = await fetchWikiContext(env, `${t.gamename || ""} ${t.content || ""}`);
+    const result = await callGLMRouter(env, t, wiki.text);
+    if (result.action === "auto" && result.reply) {
+      const reply = result.reply;
+      t.replies = t.replies || [];
+      t.replies.push({ from: "ai", auto: true, content: reply, at: (/* @__PURE__ */ new Date()).toISOString() });
+      t.status = "auto";
+      await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(t));
+      try {
+        const body = `\u4F60\u597D ${t.nickname}\uFF1A
+
+\u4F60\u7684\u5DE5\u5355 ${id} \u5DF2\u7531\u7CFB\u7EDF\u81EA\u52A8\u56DE\u590D\uFF1A
+
+${reply}
+
+\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`;
+        await sendEmail(env, t.email, `\u3010\u68A6\u4E4B\u97F5\u5DE5\u5355\u3011\u4F60\u7684\u5DE5\u5355 ${id} \u5DF2\u81EA\u52A8\u56DE\u590D`, body, emailShell("\u81EA\u52A8\u56DE\u590D", mdToHtml(reply)));
+      } catch (e) {
+        console.error("[ticket-auto-mail]", e.message);
+      }
+      return;
+    }
+    await notifyAdminNewTicket(env, t);
+  } catch (e) {
+    console.error("[ticket-auto]", id, e.message);
+    try {
+      const raw = await env.MODS_KV.get(`ticket:${id}`);
+      if (raw) {
+        const t = JSON.parse(raw);
+        if (t.status === "new") await notifyAdminNewTicket(env, t);
+      }
+    } catch (_) {
+    }
+  }
+}
+__name(autoProcessTicket, "autoProcessTicket");
+__name2(autoProcessTicket, "autoProcessTicket");
+__name22(autoProcessTicket, "autoProcessTicket");
+__name222(autoProcessTicket, "autoProcessTicket");
+__name2222(autoProcessTicket, "autoProcessTicket");
+async function handleNotifyEmailsList(env) {
+  return json({ emails: await getNotifyEmails(env) });
+}
+__name(handleNotifyEmailsList, "handleNotifyEmailsList");
+__name2(handleNotifyEmailsList, "handleNotifyEmailsList");
+__name22(handleNotifyEmailsList, "handleNotifyEmailsList");
+__name222(handleNotifyEmailsList, "handleNotifyEmailsList");
+__name2222(handleNotifyEmailsList, "handleNotifyEmailsList");
+async function handleNotifyEmailsAdd(request, env) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const email = String(body.email || "").trim().toLowerCase();
+    if (!isValidEmail(email)) return json({ error: "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E" }, 400);
+    const list = await getNotifyEmails(env);
+    if (list.includes(email)) return json({ error: "\u8BE5\u90AE\u7BB1\u5DF2\u5728\u5217\u8868\u4E2D" }, 400);
+    list.push(email);
+    await env.MODS_KV.put("ticket:notify-emails", JSON.stringify(list));
+    return json({ ok: true, emails: list });
+  } catch (e) {
+    return json({ error: e.message || "\u6DFB\u52A0\u5931\u8D25" }, 500);
+  }
+}
+__name(handleNotifyEmailsAdd, "handleNotifyEmailsAdd");
+__name2(handleNotifyEmailsAdd, "handleNotifyEmailsAdd");
+__name22(handleNotifyEmailsAdd, "handleNotifyEmailsAdd");
+__name222(handleNotifyEmailsAdd, "handleNotifyEmailsAdd");
+__name2222(handleNotifyEmailsAdd, "handleNotifyEmailsAdd");
+async function handleNotifyEmailsRemove(env, email) {
+  const target = String(email || "").toLowerCase();
+  const list = await getNotifyEmails(env);
+  const next = list.filter((m) => m.toLowerCase() !== target);
+  if (next.length === list.length) return json({ error: "\u8BE5\u90AE\u7BB1\u4E0D\u5728\u5217\u8868\u4E2D" }, 404);
+  await env.MODS_KV.put("ticket:notify-emails", JSON.stringify(next));
+  return json({ ok: true, emails: next });
+}
+__name(handleNotifyEmailsRemove, "handleNotifyEmailsRemove");
+__name2(handleNotifyEmailsRemove, "handleNotifyEmailsRemove");
+__name22(handleNotifyEmailsRemove, "handleNotifyEmailsRemove");
+__name222(handleNotifyEmailsRemove, "handleNotifyEmailsRemove");
+__name2222(handleNotifyEmailsRemove, "handleNotifyEmailsRemove");
+function randomHex(len) {
+  const arr = new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  return [...arr].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+__name(randomHex, "randomHex");
+__name2(randomHex, "randomHex");
+__name22(randomHex, "randomHex");
+__name222(randomHex, "randomHex");
+__name2222(randomHex, "randomHex");
+async function handleApiTokensList(env) {
+  const indexRaw = await env.MODS_KV.get("api:token:index");
+  const ids = indexRaw ? JSON.parse(indexRaw) : [];
+  const tokens = [];
+  for (const id of ids) {
+    const raw = await env.MODS_KV.get(`api:token:${id}`);
+    if (!raw) continue;
+    const d = JSON.parse(raw);
+    tokens.push({ id, name: d.name, createdBy: d.createdBy, createdAt: d.createdAt, prefix: d.token.slice(0, 10) + "\u2026" });
+  }
+  return json({ tokens });
+}
+__name(handleApiTokensList, "handleApiTokensList");
+__name2(handleApiTokensList, "handleApiTokensList");
+__name22(handleApiTokensList, "handleApiTokensList");
+__name222(handleApiTokensList, "handleApiTokensList");
+__name2222(handleApiTokensList, "handleApiTokensList");
+async function handleApiTokensCreate(request, env) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const name = String(body.name || "\u9ED8\u8BA4 Token").trim().slice(0, 40);
+    const who = await currentAdmin(request, env);
+    const createdBy = who.session ? who.session.login : "api";
+    const id = randomHex(6);
+    const token = "mz_" + randomHex(30);
+    const meta = { token, name, createdBy, createdAt: (/* @__PURE__ */ new Date()).toISOString() };
+    await env.MODS_KV.put(`api:token:${id}`, JSON.stringify(meta));
+    await env.MODS_KV.put(`api:token:secret:${token}`, id);
+    const indexRaw = await env.MODS_KV.get("api:token:index");
+    const index = indexRaw ? JSON.parse(indexRaw) : [];
+    index.unshift(id);
+    await env.MODS_KV.put("api:token:index", JSON.stringify(index.slice(0, 100)));
+    return json({ ok: true, id, token, name, createdAt: meta.createdAt });
+  } catch (e) {
+    return json({ error: e.message || "\u521B\u5EFA\u5931\u8D25" }, 500);
+  }
+}
+__name(handleApiTokensCreate, "handleApiTokensCreate");
+__name2(handleApiTokensCreate, "handleApiTokensCreate");
+__name22(handleApiTokensCreate, "handleApiTokensCreate");
+__name222(handleApiTokensCreate, "handleApiTokensCreate");
+__name2222(handleApiTokensCreate, "handleApiTokensCreate");
+async function handleApiTokensRemove(env, id) {
+  const raw = await env.MODS_KV.get(`api:token:${id}`);
+  if (!raw) return json({ error: "Token \u4E0D\u5B58\u5728" }, 404);
+  const d = JSON.parse(raw);
+  await env.MODS_KV.delete(`api:token:${id}`);
+  await env.MODS_KV.delete(`api:token:secret:${d.token}`);
+  const indexRaw = await env.MODS_KV.get("api:token:index");
+  const index = indexRaw ? JSON.parse(indexRaw) : [];
+  await env.MODS_KV.put("api:token:index", JSON.stringify(index.filter((x2) => x2 !== id)));
+  return json({ ok: true, message: "Token \u5DF2\u64A4\u9500" });
+}
+__name(handleApiTokensRemove, "handleApiTokensRemove");
+__name2(handleApiTokensRemove, "handleApiTokensRemove");
+__name22(handleApiTokensRemove, "handleApiTokensRemove");
+__name222(handleApiTokensRemove, "handleApiTokensRemove");
+__name2222(handleApiTokensRemove, "handleApiTokensRemove");
+async function handleTicketLookup(request, env, id) {
+  try {
+    const url = new URL(request.url);
+    const email = String(url.searchParams.get("email") || "").trim().toLowerCase();
+    const raw = await env.MODS_KV.get(`ticket:${id}`);
+    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+    const t = JSON.parse(raw);
+    if (!email || t.email.toLowerCase() !== email) return json({ error: "\u90AE\u7BB1\u4E0E\u5DE5\u5355\u4E0D\u5339\u914D" }, 403);
+    return json({
+      ticket: {
+        id: t.id,
+        gamename: t.gamename,
+        status: t.status,
+        createdAt: t.createdAt,
+        content: t.content,
+        replies: (t.replies || []).map((r) => ({ from: r.from, content: r.content, at: r.at }))
+      }
+    });
+  } catch (e) {
+    return json({ error: e.message || "\u67E5\u8BE2\u5931\u8D25" }, 500);
+  }
+}
+__name(handleTicketLookup, "handleTicketLookup");
+__name2(handleTicketLookup, "handleTicketLookup");
+__name22(handleTicketLookup, "handleTicketLookup");
+__name222(handleTicketLookup, "handleTicketLookup");
+__name2222(handleTicketLookup, "handleTicketLookup");
+async function handleTicketFollowup(request, env, id) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const email = String(body.email || "").trim().toLowerCase();
+    const content = String(body.content || "").trim();
+    if (!content) return json({ error: "\u7559\u8A00\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A" }, 400);
+    if (content.length > 5e3) return json({ error: "\u5185\u5BB9\u8D85\u51FA\u9650\u5236" }, 400);
+    const raw = await env.MODS_KV.get(`ticket:${id}`);
+    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+    const t = JSON.parse(raw);
+    if (!email || t.email.toLowerCase() !== email) return json({ error: "\u90AE\u7BB1\u4E0E\u5DE5\u5355\u4E0D\u5339\u914D" }, 403);
+    t.replies = t.replies || [];
+    t.replies.push({ from: "user", content, at: (/* @__PURE__ */ new Date()).toISOString() });
+    if (t.status === "auto" || t.status === "closed") t.status = "new";
+    await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(t));
+    const notifyEmails = await getNotifyEmails(env);
+    for (const mail of notifyEmails) {
+      if (!mail) continue;
+      try {
+        const body2 = `\u73A9\u5BB6 ${t.nickname} \u5728\u5DE5\u5355 ${id} \u8FFD\u52A0\u4E86\u7559\u8A00\uFF1A
+
+${content}
+
+\u2014\u2014 \u68A6\u4E4B\u97F5\u5DE5\u5355\u7CFB\u7EDF`;
+        await sendEmail(env, mail, `\u3010\u5DE5\u5355\u8FFD\u52A0\u3011${id} \u6765\u81EA ${t.nickname}`, body2);
+      } catch (e) {
+        console.error("[ticket-followup-mail]", mail, e.message);
+      }
+    }
+    return json({ ok: true, message: "\u7559\u8A00\u5DF2\u63D0\u4EA4\uFF0C\u6211\u4EEC\u4F1A\u5C3D\u5FEB\u5904\u7406" });
+  } catch (e) {
+    return json({ error: e.message || "\u7559\u8A00\u5931\u8D25" }, 500);
+  }
+}
+__name(handleTicketFollowup, "handleTicketFollowup");
+__name2(handleTicketFollowup, "handleTicketFollowup");
+__name22(handleTicketFollowup, "handleTicketFollowup");
+__name222(handleTicketFollowup, "handleTicketFollowup");
+__name2222(handleTicketFollowup, "handleTicketFollowup");
+async function handleAdminTicketReopen(env, id) {
+  const raw = await env.MODS_KV.get(`ticket:${id}`);
+  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+  const t = JSON.parse(raw);
+  if (t.status === "closed") t.status = "replied";
+  else if (t.status === "auto") t.status = "new";
+  await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(t));
+  return json({ ok: true, ticket: { id: t.id, status: t.status } });
+}
+__name(handleAdminTicketReopen, "handleAdminTicketReopen");
+__name2(handleAdminTicketReopen, "handleAdminTicketReopen");
+__name22(handleAdminTicketReopen, "handleAdminTicketReopen");
+__name222(handleAdminTicketReopen, "handleAdminTicketReopen");
+__name2222(handleAdminTicketReopen, "handleAdminTicketReopen");
+async function handleAdminTicketDelete(env, id) {
+  const raw = await env.MODS_KV.get(`ticket:${id}`);
+  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+  await env.MODS_KV.delete(`ticket:${id}`);
+  const indexRaw = await env.MODS_KV.get("ticket:index");
+  const index = indexRaw ? JSON.parse(indexRaw) : [];
+  await env.MODS_KV.put("ticket:index", JSON.stringify(index.filter((x2) => x2 !== id)));
+  return json({ ok: true, message: "\u5DE5\u5355\u5DF2\u5220\u9664" });
+}
+__name(handleAdminTicketDelete, "handleAdminTicketDelete");
+__name2(handleAdminTicketDelete, "handleAdminTicketDelete");
+__name22(handleAdminTicketDelete, "handleAdminTicketDelete");
+__name222(handleAdminTicketDelete, "handleAdminTicketDelete");
+__name2222(handleAdminTicketDelete, "handleAdminTicketDelete");
 var index_default = {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
-    if (path === "/auth/login") return handleLogin(env);
+    if (path === "/auth/login") return handleLogin(request, env);
     if (path === "/auth/callback") return handleCallback(request, env);
     if (path === "/auth/logout") {
       await deleteSession(env, getSessionToken(request));
       return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": clearSessionCookie() } });
     }
+    if (path === "/auth/qq") return handleQQLogin(request, env);
+    if (path === "/auth/qq/callback") return handleQQCallback(request, env);
+    if (path === "/auth/qq/bind-callback") return handleQQBindCallback(request, env);
+    if (path === "/api/oauth/qq/login-url") return handleQQLoginUrl(env);
+    if (path === "/api/oauth/qq/bind-url") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      return handleQQBindUrl(env);
+    }
+    if (path === "/api/oauth/github/bind-url") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      return handleGithubBindUrl(env);
+    }
+    if (path === "/api/oauth/unbind" && request.method === "POST") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      return handleOAuthUnbind(request, env);
+    }
+    if (path === "/api/auth/login" && request.method === "POST") return handlePasswordLogin(request, env);
     if (path === "/api/me") {
       const session = await getSession(env, getSessionToken(request));
-      const user = session ? { login: session.login, name: session.name, avatar_url: session.avatar_url } : null;
-      return json({ user, isAdmin: user ? user.login === env.ADMIN_LOGIN : false });
+      let user = null;
+      let isAdmin2 = false;
+      let isSuper = false;
+      if (session) {
+        const role = await getAdminRole(env, session.login);
+        const users = await ensureAdminUsers(env);
+        const admin = users[session.login] || {};
+        user = { login: session.login, name: session.name, role, avatar_url: session.avatar_url || admin.oauth && admin.oauth.qq && admin.oauth.qq.faceimg || null, oauth: oauthInfo(admin) };
+        isAdmin2 = role === ROLE_SUPER || role === ROLE_ADMIN;
+        isSuper = role === ROLE_SUPER;
+      }
+      return json({ user, isAdmin: isAdmin2, isSuper });
     }
+    if (path === "/api/me/profile" && request.method === "POST") return handleProfileUpdate(request, env);
+    if (path === "/api/me/password" && request.method === "POST") return handleProfilePassword(request, env);
     if (path === "/api/mods") return handleMods(env);
     if (path === "/api/mirrors") return handleMirrors(request);
     if (path === "/api/releases/latest") return handleLatest(env);
     if (path === "/api/releases") return handleReleases(env);
+    if (/^\/api\/releases\/[^/]+$/.test(path) && request.method === "GET") {
+      return handleReleaseDetail(env, path.slice("/api/releases/".length));
+    }
+    if (path === "/api/admin/stats") {
+      const denied = await requireAdminOrToken(request, env);
+      if (denied) return denied;
+      return handleAdminStats(env);
+    }
     if (path === "/api/admin/mods" || path.startsWith("/api/admin/mods/")) {
-      const denied = await requireAdmin(request, env);
+      const denied = await requireAdminOrToken(request, env);
       if (denied) return denied;
       if (path === "/api/admin/mods" && request.method === "GET") return handleAdminModsList(env);
       if (path === "/api/admin/mods" && request.method === "POST") return handleAdminUpload(request, env);
@@ -1848,44 +4006,114 @@ var index_default = {
       }
       return json({ error: "\u4E0D\u652F\u6301\u7684\u8BF7\u6C42" }, 404);
     }
+    if (path === "/api/admin/mrpack" && request.method === "POST") {
+      const denied = await requireAdminOrToken(request, env);
+      if (denied) return denied;
+      return handleMrpackUpload(request, env);
+    }
     if (path === "/api/admin/publish" && request.method === "POST") {
-      const denied = await requireAdmin(request, env);
+      const denied = await requireAdminOrToken(request, env);
       if (denied) return denied;
       return handleAdminPublish(request, env);
     }
     if (path === "/api/admin/releases/rollback" && request.method === "POST") {
-      const denied = await requireAdmin(request, env);
+      const denied = await requireAdminOrToken(request, env);
       if (denied) return denied;
       return handleAdminReleaseRollback(request, env);
     }
     if (path.startsWith("/api/admin/releases/")) {
-      const denied = await requireAdmin(request, env);
+      const denied = await requireAdminOrToken(request, env);
       if (denied) return denied;
       const id = path.slice("/api/admin/releases/".length);
       if (id && request.method === "DELETE") return handleAdminReleaseDelete(request, env, id);
       return json({ error: "\u4E0D\u652F\u6301\u7684\u8BF7\u6C42" }, 404);
     }
     if (path === "/api/tickets" && request.method === "POST") return handleTicketSubmit(request, env);
-    if (path === "/api/tickets/verify" && request.method === "POST") return handleTicketVerify(request, env);
+    if (path === "/api/tickets/verify" && request.method === "POST") return handleTicketVerify(request, env, ctx);
+    if (/^\/api\/tickets\/[^/]+$/.test(path) && request.method === "GET") {
+      return handleTicketLookup(request, env, path.slice("/api/tickets/".length));
+    }
+    if (/^\/api\/tickets\/[^/]+\/message$/.test(path) && request.method === "POST") {
+      const id = path.slice("/api/tickets/".length, -"/message".length);
+      return handleTicketFollowup(request, env, id);
+    }
+    if (path === "/api/ticket-info" && request.method === "GET") return handleTicketInfo(env);
+    if (path === "/api/error-reports/verify" && request.method === "POST") return handleErrorReportVerify(request, env);
+    if (path === "/api/error-reports/bind" && request.method === "POST") return handleErrorReportBind(request, env);
+    if (path === "/api/error-reports" && request.method === "POST") return handleErrorReportUpload(request, env, ctx);
+    if (/^\/api\/error-reports\/[^/]+$/.test(path) && request.method === "GET") {
+      return handleErrorReportLookup(request, env, path.slice("/api/error-reports/".length));
+    }
     if (path === "/api/admin/tickets" && request.method === "GET") {
-      const denied = await requireAdmin(request, env);
+      const denied = await requireAdminOrToken(request, env);
       if (denied) return denied;
       return handleAdminTickets(env);
     }
     if (path.startsWith("/api/admin/tickets/")) {
-      const denied = await requireAdmin(request, env);
+      const denied = await requireAdminOrToken(request, env);
       if (denied) return denied;
       const rest = path.slice("/api/admin/tickets/".length);
       if (request.method === "GET" && rest) return handleAdminTicketDetail(env, rest);
       if (request.method === "POST" && rest.endsWith("/reply")) return handleAdminTicketReply(request, env, rest.slice(0, -6));
       if (request.method === "POST" && rest.endsWith("/close")) return handleAdminTicketClose(env, rest.slice(0, -6));
+      if (request.method === "POST" && rest.endsWith("/reopen")) return handleAdminTicketReopen(env, rest.slice(0, -7));
+      if (request.method === "POST" && rest.endsWith("/ai")) return handleAdminTicketAi(request, env, rest.slice(0, -3));
+      if (request.method === "DELETE" && rest) return handleAdminTicketDelete(env, rest);
       return json({ error: "\u4E0D\u652F\u6301\u7684\u8BF7\u6C42" }, 404);
     }
+    if (path === "/api/admin/notify-emails") {
+      const denied = await requireAdminOrToken(request, env);
+      if (denied) return denied;
+      if (request.method === "GET") return handleNotifyEmailsList(env);
+      if (request.method === "POST") return handleNotifyEmailsAdd(request, env);
+      return json({ error: "\u4E0D\u652F\u6301\u7684\u8BF7\u6C42" }, 404);
+    }
+    if (path.startsWith("/api/admin/notify-emails/") && request.method === "DELETE") {
+      const denied = await requireAdminOrToken(request, env);
+      if (denied) return denied;
+      return handleNotifyEmailsRemove(env, decodeURIComponent(path.slice("/api/admin/notify-emails/".length)));
+    }
+    if (path === "/api/admin/api-tokens") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      if (request.method === "GET") return handleApiTokensList(env);
+      if (request.method === "POST") return handleApiTokensCreate(request, env);
+      return json({ error: "\u4E0D\u652F\u6301\u7684\u8BF7\u6C42" }, 404);
+    }
+    if (path.startsWith("/api/admin/api-tokens/") && request.method === "DELETE") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      return handleApiTokensRemove(env, path.slice("/api/admin/api-tokens/".length));
+    }
+    if (path === "/api/admin/users" && request.method === "GET") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      return handleAdminUsersList(request, env);
+    }
+    if (path === "/api/admin/users" && request.method === "POST") {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      return handleAdminUsersCreate(request, env);
+    }
+    if (path.startsWith("/api/admin/users/")) {
+      const denied = await requireAdmin(request, env);
+      if (denied) return denied;
+      const rest = path.slice("/api/admin/users/".length);
+      const slash = rest.lastIndexOf("/");
+      const username = decodeURIComponent(slash < 0 ? rest : rest.slice(0, slash));
+      const action = slash < 0 ? "" : rest.slice(slash + 1);
+      if (!action && request.method === "DELETE") return handleAdminUsersDelete(request, env, username);
+      if (action === "password" && request.method === "POST") return handleAdminUserPassword(request, env, username);
+      if (action === "role" && request.method === "POST") return handleAdminUserRole(request, env, username);
+      return json({ error: "\u4E0D\u652F\u6301\u7684\u64CD\u4F5C" }, 404);
+    }
     return env.ASSETS.fetch(request);
+  },
+  async scheduled(controller, env, ctx) {
+    await drainErrorReportQueue(env, ctx);
   }
 };
 export {
   index_default as default
 };
 //# sourceMappingURL=index.js.map
-
