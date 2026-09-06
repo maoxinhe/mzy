@@ -35,3 +35,8 @@ ADMIN_EMAIL = "catkinr@qq.com"
 
 [triggers]
 crons = ["* * * * *"]
+
+# 智能放置：worker 逻辑自动运行在离后端（GLM/GitHub/Resend/SSO）最近的节点，缩短后端往返延迟
+# 静态资源仍始终从离访问者最近的节点提供，不受影响
+[placement]
+mode = "smart"
