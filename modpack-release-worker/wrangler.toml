@@ -14,16 +14,24 @@ id = "e4d70dfbb2f64e898b1da0ea167e8104"
 binding = "MODS_R2"
 bucket_name = "modpack-mods"
 
+[[d1_databases]]
+binding = "MODS_D1"
+database_name = "modpack-release-db"
+database_id = "b838b9e7-5ca1-416d-a420-307be040acb7"
+
 [vars]
 ADMIN_LOGIN = "maoxinhe"
 BASE_URL = "https://releases.camzy.uno"
+GITHUB_CLIENT_ID = "Ov23lix8isGOSSoCOv1w"
 MAX_UPLOAD_MB = "100"
 REPO_BRANCH = "main"
 REPO_NAME = "modpack"
 REPO_OWNER = "maoxinhe"
 SESSION_TTL_HOURS = "168"
 # ---- 工单系统邮件（Resend HTTP API）----
-RESEND_API_KEY = "re_xxxxxxxxxxxx" # 请替换为你的 Resend API Key
 MAIL_FROM = "工单系统 <noreply@camzy.uno>"
 # 管理员收件邮箱（新工单通知）
 ADMIN_EMAIL = "catkinr@qq.com"
+
+[triggers]
+crons = ["* * * * *"]

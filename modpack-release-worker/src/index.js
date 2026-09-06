@@ -2314,13 +2314,7 @@ __name222(handleReleaseDetail, "handleReleaseDetail");
 __name2222(handleReleaseDetail, "handleReleaseDetail");
 async function handleAdminStats(env) {
   const [mods, releases, state] = await Promise.all([listMods(env), listReleases(env), readState(env)]);
-  const indexRaw = await env.MODS_KV.get("ticket:index");
-  const ids = indexRaw ? JSON.parse(indexRaw) : [];
-  const tickets = [];
-  for (const id of ids.slice(-300)) {
-    const raw = await env.MODS_KV.get(`ticket:${id}`);
-    if (raw) tickets.push(JSON.parse(raw));
-  }
+  const tickets = await ticketList(env);
   return json({
     stats: {
       mods: mods.length,
@@ -2894,6 +2888,130 @@ __name2(ticketId, "ticketId");
 __name22(ticketId, "ticketId");
 __name222(ticketId, "ticketId");
 __name2222(ticketId, "ticketId");
+// ---- D1 数据层（错误报告 / 工单 / 限流 迁移到 D1，KV 降为辅）----
+async function erGet(env, id) {
+  const row = await env.MODS_D1.prepare("SELECT data FROM error_reports WHERE id=?").bind(id).first();
+  if (!row) return null;
+  try {
+    return JSON.parse(row.data);
+  } catch (_) {
+    return null;
+  }
+}
+async function erPut(env, rec) {
+  const data = JSON.stringify(rec);
+  const created = rec.createdAt || (/* @__PURE__ */ new Date()).toISOString();
+  await env.MODS_D1.prepare("INSERT INTO error_reports (id, data, createdAt) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data").bind(rec.id, data, created).run();
+}
+async function erDelete(env, id) {
+  await env.MODS_D1.prepare("DELETE FROM error_reports WHERE id=?").bind(id).run();
+}
+async function erMetaGet(env, k, def) {
+  const row = await env.MODS_D1.prepare("SELECT v FROM er_meta WHERE k=?").bind(k).first();
+  if (!row) return def;
+  try {
+    return JSON.parse(row.v);
+  } catch (_) {
+    return def;
+  }
+}
+async function erMetaSet(env, k, v) {
+  await env.MODS_D1.prepare("INSERT INTO er_meta (k, v) VALUES (?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(k, JSON.stringify(v)).run();
+}
+async function ticketGet(env, id) {
+  const row = await env.MODS_D1.prepare("SELECT data FROM tickets WHERE id=?").bind(id).first();
+  if (!row) return null;
+  try {
+    return JSON.parse(row.data);
+  } catch (_) {
+    return null;
+  }
+}
+async function ticketPut(env, t) {
+  const data = JSON.stringify(t);
+  const created = t.createdAt || (/* @__PURE__ */ new Date()).toISOString();
+  await env.MODS_D1.prepare("INSERT INTO tickets (id, data, createdAt) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data").bind(t.id, data, created).run();
+}
+async function ticketList(env, limit = 300) {
+  const rows = await env.MODS_D1.prepare("SELECT data FROM tickets ORDER BY createdAt DESC LIMIT ?").bind(limit).all();
+  const out = [];
+  for (const r of rows.results || []) {
+    try {
+      out.push(JSON.parse(r.data));
+    } catch (_) {
+    }
+  }
+  return out;
+}
+async function ticketDelete(env, id) {
+  await env.MODS_D1.prepare("DELETE FROM tickets WHERE id=?").bind(id).run();
+}
+async function cleanupD1(env) {
+  try {
+    const cutoff = new Date(Date.now() - 14 * 24 * 3600 * 1e3).toISOString();
+    await env.MODS_D1.prepare("DELETE FROM error_reports WHERE createdAt < ?").bind(cutoff).run();
+  } catch (e) {
+    console.error("[d1-cleanup]", e.message);
+  }
+}
+async function migrateFromKV(env) {
+  try {
+    const tc = (await env.MODS_D1.prepare("SELECT COUNT(*) AS c FROM tickets").first())?.c || 0;
+    const ec = (await env.MODS_D1.prepare("SELECT COUNT(*) AS c FROM error_reports").first())?.c || 0;
+    if (tc > 0 && ec > 0) return;
+    const stmts = [];
+    if (tc === 0) {
+      const indexRaw = await env.MODS_KV.get("ticket:index");
+      const ids = indexRaw ? JSON.parse(indexRaw) : [];
+      for (const id of ids) {
+        const raw = await env.MODS_KV.get(`ticket:${id}`);
+        if (!raw) continue;
+        try {
+          const t = JSON.parse(raw);
+          if (!t || !t.id) continue;
+          stmts.push(env.MODS_D1.prepare("INSERT OR IGNORE INTO tickets (id, data, createdAt) VALUES (?,?,?)").bind(t.id, JSON.stringify(t), t.createdAt || ""));
+        } catch (_) {
+        }
+      }
+      for (const id of ids) await env.MODS_KV.delete(`ticket:${id}`).catch(() => {
+      });
+      await env.MODS_KV.delete("ticket:index").catch(() => {
+      });
+    }
+    if (ec === 0) {
+      const listed = await env.MODS_KV.list({ prefix: "er:report:" });
+      for (const key of listed.keys || []) {
+        const raw = await env.MODS_KV.get(key.name);
+        if (!raw) continue;
+        try {
+          const r = JSON.parse(raw);
+          if (!r || !r.id) continue;
+          stmts.push(env.MODS_D1.prepare("INSERT OR IGNORE INTO error_reports (id, data, createdAt) VALUES (?,?,?)").bind(r.id, JSON.stringify(r), r.createdAt || ""));
+          await env.MODS_KV.delete(key.name).catch(() => {
+          });
+        } catch (_) {
+        }
+      }
+      const queueRaw = await env.MODS_KV.get("er:queue");
+      if (queueRaw) {
+        try {
+          const q = JSON.parse(queueRaw);
+          if (Array.isArray(q)) await erMetaSet(env, "queue", q);
+        } catch (_) {
+        }
+        await env.MODS_KV.delete("er:queue").catch(() => {
+        });
+      }
+    }
+    await env.MODS_KV.delete("er:lock").catch(() => {
+    });
+    if (!stmts.length) return;
+    await env.MODS_D1.batch(stmts);
+    console.log("[d1-migrate]", "migrated", stmts.length, "records from KV to D1");
+  } catch (e) {
+    console.error("[d1-migrate]", e.message);
+  }
+}
 async function handleTicketSubmit(request, env) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -2961,11 +3079,7 @@ async function handleTicketVerify(request, env, ctx) {
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       replies: []
     };
-    await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
-    const indexRaw = await env.MODS_KV.get("ticket:index");
-    const index = indexRaw ? JSON.parse(indexRaw) : [];
-    index.unshift(id);
-    await env.MODS_KV.put("ticket:index", JSON.stringify(index.slice(0, 300)));
+    await ticketPut(env, ticket);
     const proc = autoProcessTicket(env, id);
     if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(proc);
     else await proc;
@@ -2985,18 +3099,29 @@ function clientIP(request) {
 __name(clientIP, "clientIP");
 __name2(clientIP, "clientIP");
 async function checkRateLimit(env, kind, key, limit, windowSeconds) {
-  const rlKey = `er:rl:${kind}:${key}`;
-  const raw = await env.MODS_KV.get(rlKey);
-  const hits = raw ? JSON.parse(raw) : [];
   const now = Date.now();
-  const recent = hits.filter((t) => t > now - windowSeconds * 1e3);
-  if (recent.length >= limit) {
-    const oldest = recent[0] || now;
-    return { error: "\u8BF7\u6C42\u8FC7\u4E8E\u9891\u7E41\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5", retryAfter: Math.max(1, Math.ceil((oldest + windowSeconds * 1e3 - now) / 1e3)) };
+  try {
+    const row = await env.MODS_D1.prepare("SELECT ts FROM er_rl WHERE kind=? AND k=?").bind(kind, key).first();
+    let recent = [];
+    if (row && row.ts) {
+      try {
+        recent = JSON.parse(row.ts);
+      } catch (_) {
+        recent = [];
+      }
+      recent = recent.filter((t) => t > now - windowSeconds * 1e3);
+    }
+    if (recent.length >= limit) {
+      const oldest = recent[0] || now;
+      return { error: "\u8BF7\u6C42\u8FC7\u4E8E\u9891\u7E41\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5", retryAfter: Math.max(1, Math.ceil((oldest + windowSeconds * 1e3 - now) / 1e3)) };
+    }
+    recent.push(now);
+    recent = recent.filter((t) => t > now - windowSeconds * 1e3);
+    await env.MODS_D1.prepare("INSERT INTO er_rl (kind, k, ts) VALUES (?,?,?) ON CONFLICT(kind,k) DO UPDATE SET ts=excluded.ts").bind(kind, key, JSON.stringify(recent)).run();
+    return null;
+  } catch (e) {
+    return null;
   }
-  recent.push(now);
-  await env.MODS_KV.put(rlKey, JSON.stringify(recent), { expirationTtl: windowSeconds + 60 });
-  return null;
 }
 __name(checkRateLimit, "checkRateLimit");
 __name2(checkRateLimit, "checkRateLimit");
@@ -3188,8 +3313,7 @@ async function handleErrorReportUpload(request, env, ctx) {
     if (buf.byteLength > maxBytes) return json({ error: `\u6587\u4EF6\u8D85\u8FC7\u5927\u5C0F\u4E0A\u9650\uFF08${maxMB}MB\uFF09` }, 400);
     const rlMail = await checkRateLimit(env, "mail", email, limit, windowSec);
     if (rlMail) return json({ error: rlMail.error, retry_after: rlMail.retryAfter }, 429, { "Retry-After": String(rlMail.retryAfter) });
-    const queueRaw = await env.MODS_KV.get("er:queue");
-    const queue = queueRaw ? JSON.parse(queueRaw) : [];
+    const queue = await erMetaGet(env, "queue", []);
     const maxQueue = parseInt(env.ERROR_REPORT_MAX_QUEUE || "20", 10);
     if (queue.length >= maxQueue) return json({ error: "\u5F53\u524D\u5206\u6790\u4EFB\u52A1\u7E41\u5FD9\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5" }, 429);
     const id = "ER" + Date.now().toString(36).toUpperCase() + randomHex(4).toUpperCase();
@@ -3200,9 +3324,9 @@ async function handleErrorReportUpload(request, env, ctx) {
       httpMetadata: { contentType: "application/zip" },
       customMetadata: { email, uploadedAt: nowIso }
     });
-    await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+    await erPut(env, record);
     queue.push(id);
-    await env.MODS_KV.put("er:queue", JSON.stringify(queue.slice(-100)));
+    await erMetaSet(env, "queue", queue.slice(-100));
     return json({ ok: true, report_id: id, status: "queued", message: "\u4E0A\u4F20\u6210\u529F\uFF0C\u5DF2\u5165\u961F\u7B49\u5F85\u5206\u6790\uFF0C\u7ED3\u679C\u5C06\u53D1\u9001\u5230\u4F60\u7684\u90AE\u7BB1\u5E76\u53EF\u901A\u8FC7\u67E5\u8BE2\u63A5\u53E3\u83B7\u53D6", poll: { method: "GET", path: `/api/error-reports/${id}`, token }, ttl_hours: 168 });
   } catch (e) {
     return json({ error: e.message || "\u4E0A\u4F20\u5931\u8D25" }, e.status || 500);
@@ -3211,9 +3335,8 @@ async function handleErrorReportUpload(request, env, ctx) {
 __name(handleErrorReportUpload, "handleErrorReportUpload");
 __name2(handleErrorReportUpload, "handleErrorReportUpload");
 async function handleErrorReportLookup(request, env, id) {
-  const raw = await env.MODS_KV.get(`er:report:${id}`);
-  if (!raw) return json({ error: "\u9519\u8BEF\u62A5\u544A\u4E0D\u5B58\u5728\u6216\u5DF2\u8FC7\u671F" }, 404);
-  const record = JSON.parse(raw);
+  const record = await erGet(env, id);
+  if (!record) return json({ error: "\u9519\u8BEF\u62A5\u544A\u4E0D\u5B58\u5728\u6216\u5DF2\u8FC7\u671F" }, 404);
   const q = new URL(request.url);
   const token = request.headers.get("X-Report-Token") || q.searchParams.get("token") || "";
   if (token !== record.token) return json({ error: "token \u4E0D\u6B63\u786E\uFF0C\u65E0\u6CD5\u67E5\u8BE2\u8BE5\u62A5\u544A" }, 403);
@@ -3231,15 +3354,14 @@ __name(deleteErrorReportR2, "deleteErrorReportR2");
 __name2(deleteErrorReportR2, "deleteErrorReportR2");
 async function processErrorReport(env, id) {
   try {
-    const raw = await env.MODS_KV.get(`er:report:${id}`);
-    if (!raw) return;
-    const record = JSON.parse(raw);
+    const record = await erGet(env, id);
+    if (!record) return;
     if (record.status !== "queued") return;
     record.status = "processing";
     record.attempts = (record.attempts || 0) + 1;
     record.processingAt = (/* @__PURE__ */ new Date()).toISOString();
     record.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
-    await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+    await erPut(env, record);
     const obj = await env.MODS_R2.get(`error-reports/${id}/original.zip`);
     if (!obj) throw new Error("\u539F\u59CB\u6587\u4EF6\u4E0D\u5B58\u5728");
     const buf = await obj.arrayBuffer();
@@ -3260,11 +3382,7 @@ async function processErrorReport(env, id) {
 \u73A9\u5BB6\u63CF\u8FF0\uFF1A${record.description || "\u65E0"}
 
 ${record.result}`, status: "auto", source: "error-report", errorReportId: id, createdAt: (/* @__PURE__ */ new Date()).toISOString(), replies: [{ from: "ai", auto: true, content: record.result, at: (/* @__PURE__ */ new Date()).toISOString() }] };
-      await env.MODS_KV.put(`ticket:${tid}`, JSON.stringify(ticket));
-      const indexRaw = await env.MODS_KV.get("ticket:index");
-      const index = indexRaw ? JSON.parse(indexRaw) : [];
-      index.unshift(tid);
-      await env.MODS_KV.put("ticket:index", JSON.stringify(index.slice(0, 300)));
+      await ticketPut(env, ticket);
       record.ticketId = tid;
       const mailBody = `\u4F60\u597D ${record.nickname || "\u73A9\u5BB6"}\uFF1A
 
@@ -3282,17 +3400,16 @@ ${record.result}
     }
     await deleteErrorReportR2(env, id);
     record.r2DeletedAt = (/* @__PURE__ */ new Date()).toISOString();
-    await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+    await erPut(env, record);
   } catch (e) {
     console.error("[error-report]", id, e.message);
     try {
-      const raw = await env.MODS_KV.get(`er:report:${id}`);
-      if (raw) {
-        const record = JSON.parse(raw);
+      const record = await erGet(env, id);
+      if (record) {
         record.status = "error";
         record.error = e.message || "\u5206\u6790\u5931\u8D25";
         record.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
-        await env.MODS_KV.put(`er:report:${id}`, JSON.stringify(record), { expirationTtl: 7 * 24 * 3600 });
+        await erPut(env, record);
       }
     } catch (_) {
     }
@@ -3302,26 +3419,23 @@ __name(processErrorReport, "processErrorReport");
 __name2(processErrorReport, "processErrorReport");
 async function drainErrorReportQueue(env, ctx) {
   try {
-    const lockRaw = await env.MODS_KV.get("er:lock");
-    if (lockRaw) return;
+    if (await erMetaGet(env, "lock", null)) return;
     const budgetMs = parseInt(env.ERROR_REPORT_CRON_BUDGET_MS || "720000", 10);
     const maxPerRun = parseInt(env.ERROR_REPORT_CRON_MAX || "2", 10);
     const maxRetry = parseInt(env.ERROR_REPORT_MAX_RETRY || "2", 10);
     const leaseMs = parseInt(env.ERROR_REPORT_LEASE_MS || "900000", 10);
-    await env.MODS_KV.put("er:lock", "1", { expirationTtl: Math.ceil(budgetMs / 1e3) + 120 });
+    await erMetaSet(env, "lock", 1);
     const deadline = Date.now() + budgetMs;
     let queue = [];
     const loadQueue = /* @__PURE__ */ __name2(async () => {
-      const raw = await env.MODS_KV.get("er:queue");
-      queue = raw ? JSON.parse(raw) : [];
+      queue = await erMetaGet(env, "queue", []);
     }, "loadQueue");
-    const saveQueue = /* @__PURE__ */ __name2(() => env.MODS_KV.put("er:queue", JSON.stringify(queue.slice(-100))), "saveQueue");
+    const saveQueue = /* @__PURE__ */ __name2(() => erMetaSet(env, "queue", queue.slice(-100)), "saveQueue");
     await loadQueue();
     let processed = 0;
     while (queue.length && processed < maxPerRun && Date.now() < deadline) {
       const id = queue.shift();
-      const raw = await env.MODS_KV.get(`er:report:${id}`);
-      let rec = raw ? JSON.parse(raw) : null;
+      const rec = await erGet(env, id);
       if (rec) {
         if (rec.status === "processing") {
           const since = rec.processingAt ? Date.now() - new Date(rec.processingAt).getTime() : Infinity;
@@ -3335,6 +3449,7 @@ async function drainErrorReportQueue(env, ctx) {
         if (rec.status === "error") {
           if ((rec.attempts || 0) >= maxRetry) {
             await deleteErrorReportR2(env, id);
+            await erDelete(env, id);
             await saveQueue();
             continue;
           }
@@ -3343,8 +3458,7 @@ async function drainErrorReportQueue(env, ctx) {
         if (rec.status === "queued") {
           await processErrorReport(env, id);
           processed++;
-          const afterRaw = await env.MODS_KV.get(`er:report:${id}`);
-          const after = afterRaw ? JSON.parse(afterRaw) : null;
+          const after = await erGet(env, id);
           if (after && after.status === "error" && (after.attempts || 0) < maxRetry) {
             queue.push(id);
           }
@@ -3356,7 +3470,7 @@ async function drainErrorReportQueue(env, ctx) {
     console.error("[error-report-drain]", e.message);
   } finally {
     try {
-      await env.MODS_KV.delete("er:lock");
+      await erMetaSet(env, "lock", null);
     } catch (_) {
     }
   }
@@ -3365,24 +3479,19 @@ __name(drainErrorReportQueue, "drainErrorReportQueue");
 __name2(drainErrorReportQueue, "drainErrorReportQueue");
 __name22(drainErrorReportQueue, "drainErrorReportQueue");
 async function handleAdminTickets(env) {
-  const indexRaw = await env.MODS_KV.get("ticket:index");
-  const ids = indexRaw ? JSON.parse(indexRaw) : [];
+  const list = await ticketList(env);
   const tickets = [];
-  for (const id of ids) {
-    const raw = await env.MODS_KV.get(`ticket:${id}`);
-    if (raw) {
-      const t = JSON.parse(raw);
-      tickets.push({
-        id: t.id,
-        nickname: t.nickname,
-        gamename: t.gamename,
-        email: t.email,
-        status: t.status,
-        createdAt: t.createdAt,
-        replyCount: (t.replies || []).length,
-        content: t.content
-      });
-    }
+  for (const t of list) {
+    tickets.push({
+      id: t.id,
+      nickname: t.nickname,
+      gamename: t.gamename,
+      email: t.email,
+      status: t.status,
+      createdAt: t.createdAt,
+      replyCount: (t.replies || []).length,
+      content: t.content
+    });
   }
   return json({ tickets });
 }
@@ -3392,9 +3501,9 @@ __name22(handleAdminTickets, "handleAdminTickets");
 __name222(handleAdminTickets, "handleAdminTickets");
 __name2222(handleAdminTickets, "handleAdminTickets");
 async function handleAdminTicketDetail(env, id) {
-  const raw = await env.MODS_KV.get(`ticket:${id}`);
-  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-  return json({ ticket: JSON.parse(raw) });
+  const t = await ticketGet(env, id);
+  if (!t) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+  return json({ ticket: t });
 }
 __name(handleAdminTicketDetail, "handleAdminTicketDetail");
 __name2(handleAdminTicketDetail, "handleAdminTicketDetail");
@@ -3403,16 +3512,15 @@ __name222(handleAdminTicketDetail, "handleAdminTicketDetail");
 __name2222(handleAdminTicketDetail, "handleAdminTicketDetail");
 async function handleAdminTicketReply(request, env, id) {
   try {
-    const raw = await env.MODS_KV.get(`ticket:${id}`);
-    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-    const ticket = JSON.parse(raw);
+    const ticket = await ticketGet(env, id);
+    if (!ticket) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
     const body = await request.json().catch(() => ({}));
     const content = String(body.content || "").trim();
     if (!content) return json({ error: "\u56DE\u590D\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A" }, 400);
     ticket.replies = ticket.replies || [];
     ticket.replies.push({ from: "admin", content, at: (/* @__PURE__ */ new Date()).toISOString() });
     if (ticket.status !== "closed") ticket.status = "replied";
-    await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
+    await ticketPut(env, ticket);
     try {
       const body2 = `\u4F60\u597D ${ticket.nickname} \uFF1A
 
@@ -3442,11 +3550,10 @@ __name22(handleAdminTicketReply, "handleAdminTicketReply");
 __name222(handleAdminTicketReply, "handleAdminTicketReply");
 __name2222(handleAdminTicketReply, "handleAdminTicketReply");
 async function handleAdminTicketClose(env, id) {
-  const raw = await env.MODS_KV.get(`ticket:${id}`);
-  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-  const ticket = JSON.parse(raw);
+  const ticket = await ticketGet(env, id);
+  if (!ticket) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
   ticket.status = "closed";
-  await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(ticket));
+  await ticketPut(env, ticket);
   try {
     const body = `\u4F60\u597D ${ticket.nickname} \uFF1A
 
@@ -3579,9 +3686,8 @@ __name222(callGLM, "callGLM");
 __name2222(callGLM, "callGLM");
 async function handleAdminTicketAi(request, env, id) {
   try {
-    const raw = await env.MODS_KV.get(`ticket:${id}`);
-    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-    const t = JSON.parse(raw);
+    const t = await ticketGet(env, id);
+    if (!t) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
     const ctx = await fetchWikiContext(env, `${t.gamename || ""} ${t.content || ""}`);
     const system = `\u4F60\u662F\u300C\u68A6\u4E4B\u97F5\u300DMinecraft \u6A21\u7EC4\u5305\u5B98\u65B9\u5BA2\u670D\uFF0C\u8D1F\u8D23\u57FA\u4E8E\u77E5\u8BC6\u5E93\u64B0\u5199\u5DE5\u5355\u56DE\u590D\u8349\u7A3F\u3002
 
@@ -3685,9 +3791,8 @@ __name222(notifyAdminNewTicket, "notifyAdminNewTicket");
 __name2222(notifyAdminNewTicket, "notifyAdminNewTicket");
 async function autoProcessTicket(env, id) {
   try {
-    const raw = await env.MODS_KV.get(`ticket:${id}`);
-    if (!raw) return;
-    const t = JSON.parse(raw);
+    const t = await ticketGet(env, id);
+    if (!t) return;
     if (t.status !== "new") return;
     if (!env.GLM_API_KEY) {
       await notifyAdminNewTicket(env, t);
@@ -3700,7 +3805,7 @@ async function autoProcessTicket(env, id) {
       t.replies = t.replies || [];
       t.replies.push({ from: "ai", auto: true, content: reply, at: (/* @__PURE__ */ new Date()).toISOString() });
       t.status = "auto";
-      await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(t));
+      await ticketPut(env, t);
       try {
         const body = `\u4F60\u597D ${t.nickname}\uFF1A
 
@@ -3719,11 +3824,8 @@ ${reply}
   } catch (e) {
     console.error("[ticket-auto]", id, e.message);
     try {
-      const raw = await env.MODS_KV.get(`ticket:${id}`);
-      if (raw) {
-        const t = JSON.parse(raw);
-        if (t.status === "new") await notifyAdminNewTicket(env, t);
-      }
+      const t = await ticketGet(env, id);
+      if (t && t.status === "new") await notifyAdminNewTicket(env, t);
     } catch (_) {
     }
   }
@@ -3845,9 +3947,8 @@ async function handleTicketLookup(request, env, id) {
   try {
     const url = new URL(request.url);
     const email = String(url.searchParams.get("email") || "").trim().toLowerCase();
-    const raw = await env.MODS_KV.get(`ticket:${id}`);
-    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-    const t = JSON.parse(raw);
+    const t = await ticketGet(env, id);
+    if (!t) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
     if (!email || t.email.toLowerCase() !== email) return json({ error: "\u90AE\u7BB1\u4E0E\u5DE5\u5355\u4E0D\u5339\u914D" }, 403);
     return json({
       ticket: {
@@ -3875,14 +3976,13 @@ async function handleTicketFollowup(request, env, id) {
     const content = String(body.content || "").trim();
     if (!content) return json({ error: "\u7559\u8A00\u5185\u5BB9\u4E0D\u80FD\u4E3A\u7A7A" }, 400);
     if (content.length > 5e3) return json({ error: "\u5185\u5BB9\u8D85\u51FA\u9650\u5236" }, 400);
-    const raw = await env.MODS_KV.get(`ticket:${id}`);
-    if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-    const t = JSON.parse(raw);
+    const t = await ticketGet(env, id);
+    if (!t) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
     if (!email || t.email.toLowerCase() !== email) return json({ error: "\u90AE\u7BB1\u4E0E\u5DE5\u5355\u4E0D\u5339\u914D" }, 403);
     t.replies = t.replies || [];
     t.replies.push({ from: "user", content, at: (/* @__PURE__ */ new Date()).toISOString() });
     if (t.status === "auto" || t.status === "closed") t.status = "new";
-    await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(t));
+    await ticketPut(env, t);
     const notifyEmails = await getNotifyEmails(env);
     for (const mail of notifyEmails) {
       if (!mail) continue;
@@ -3908,12 +4008,11 @@ __name22(handleTicketFollowup, "handleTicketFollowup");
 __name222(handleTicketFollowup, "handleTicketFollowup");
 __name2222(handleTicketFollowup, "handleTicketFollowup");
 async function handleAdminTicketReopen(env, id) {
-  const raw = await env.MODS_KV.get(`ticket:${id}`);
-  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-  const t = JSON.parse(raw);
+  const t = await ticketGet(env, id);
+  if (!t) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
   if (t.status === "closed") t.status = "replied";
   else if (t.status === "auto") t.status = "new";
-  await env.MODS_KV.put(`ticket:${id}`, JSON.stringify(t));
+  await ticketPut(env, t);
   return json({ ok: true, ticket: { id: t.id, status: t.status } });
 }
 __name(handleAdminTicketReopen, "handleAdminTicketReopen");
@@ -3922,12 +4021,9 @@ __name22(handleAdminTicketReopen, "handleAdminTicketReopen");
 __name222(handleAdminTicketReopen, "handleAdminTicketReopen");
 __name2222(handleAdminTicketReopen, "handleAdminTicketReopen");
 async function handleAdminTicketDelete(env, id) {
-  const raw = await env.MODS_KV.get(`ticket:${id}`);
-  if (!raw) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
-  await env.MODS_KV.delete(`ticket:${id}`);
-  const indexRaw = await env.MODS_KV.get("ticket:index");
-  const index = indexRaw ? JSON.parse(indexRaw) : [];
-  await env.MODS_KV.put("ticket:index", JSON.stringify(index.filter((x2) => x2 !== id)));
+  const t = await ticketGet(env, id);
+  if (!t) return json({ error: "\u5DE5\u5355\u4E0D\u5B58\u5728" }, 404);
+  await ticketDelete(env, id);
   return json({ ok: true, message: "\u5DE5\u5355\u5DF2\u5220\u9664" });
 }
 __name(handleAdminTicketDelete, "handleAdminTicketDelete");
@@ -4110,7 +4206,9 @@ var index_default = {
     return env.ASSETS.fetch(request);
   },
   async scheduled(controller, env, ctx) {
+    await migrateFromKV(env);
     await drainErrorReportQueue(env, ctx);
+    await cleanupD1(env);
   }
 };
 export {
