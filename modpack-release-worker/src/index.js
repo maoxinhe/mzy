@@ -1774,16 +1774,56 @@ function safeNext(raw) {
 }
 __name(safeNext, "safeNext");
 __name2(safeNext, "safeNext");
-async function handleLogin(request, env) {
-  if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
-    return text("\u5C1A\u672A\u914D\u7F6E GitHub OAuth\uFF08GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET\uFF09\uFF0C\u8BF7\u7528 wrangler secret \u914D\u7F6E\u540E\u91CD\u8BD5", 400);
+var SSO_ISSUER = "https://sso.camzy.uno";
+async function ssoExchange(env, code, redirectUri) {
+  const res = await fetch(`${SSO_ISSUER}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: redirectUri,
+      client_id: env.SSO_CLIENT_ID,
+      client_secret: env.SSO_CLIENT_SECRET
+    })
+  });
+  const data = await res.json().catch(() => null);
+  if (!data || !data.access_token) {
+    throw new Error(data && data.error_description || data && data.error || "\u6362\u53D6 SSO \u4EE4\u724C\u5931\u8D25");
   }
+  return data;
+}
+async function ssoUserInfo(env, accessToken) {
+  const res = await fetch(`${SSO_ISSUER}/oauth/userinfo`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  const user = await res.json().catch(() => null);
+  if (!user || !user.sub) throw new Error("\u8BFB\u53D6 SSO \u7528\u6237\u4FE1\u606F\u5931\u8D25");
+  return user;
+}
+function ssoAuthorizeUrl(env, redirectUri, state) {
+  const u = new URL(`${SSO_ISSUER}/oauth/authorize`);
+  u.searchParams.set("client_id", env.SSO_CLIENT_ID);
+  u.searchParams.set("redirect_uri", redirectUri);
+  u.searchParams.set("response_type", "code");
+  u.searchParams.set("scope", "openid profile email");
+  u.searchParams.set("state", state);
+  return u.toString();
+}
+function ssoCheck(env) {
+  if (!env.SSO_CLIENT_ID || !env.SSO_CLIENT_SECRET) {
+    return "\u5C1A\u672A\u914D\u7F6E SSO \u767B\u5F55\uFF08SSO_CLIENT_ID / SSO_CLIENT_SECRET\uFF09\uFF0C\u8BF7\u7528 wrangler secret \u914D\u7F6E\u540E\u91CD\u8BD5";
+  }
+  return null;
+}
+async function handleLogin(request, env) {
+  const missing = ssoCheck(env);
+  if (missing) return text(missing, 400);
   const next = safeNext(new URL(request.url).searchParams.get("next"));
   const token = randomHex(16);
   await env.MODS_KV.put(`oauth:n:${token}`, next, { expirationTtl: 600 });
   const redirectUri = `${env.BASE_URL || "https://modpack-release.catkinr-93f.workers.dev"}/auth/callback`;
-  const url = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(env.GITHUB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=read:user&state=l:${token}`;
-  return Response.redirect(url, 302);
+  return Response.redirect(ssoAuthorizeUrl(env, redirectUri, `l:${token}`), 302);
 }
 __name(handleLogin, "handleLogin");
 __name2(handleLogin, "handleLogin");
@@ -1795,47 +1835,40 @@ async function handleCallback(request, env) {
     const url = new URL(request.url);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state") || "modpack";
+    const redirectUri = `${env.BASE_URL || "https://modpack-release.catkinr-93f.workers.dev"}/auth/callback`;
     if (!code) return text("\u7F3A\u5C11\u6388\u6743\u7801", 400);
-    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({
-        client_id: env.GITHUB_CLIENT_ID,
-        client_secret: env.GITHUB_CLIENT_SECRET,
-        code
-      })
-    });
-    const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) {
-      return oauthResultPage("GitHub \u6388\u6743\u5931\u8D25", `${tokenData.error_description || tokenData.error || "unknown"}`, false);
-    }
-    const user = await getUser(env, tokenData.access_token);
+    const missing = ssoCheck(env);
+    if (missing) return oauthResultPage("\u767B\u5F55\u5931\u8D25", missing, false);
+    const tokenData = await ssoExchange(env, code, redirectUri);
+    const user = await ssoUserInfo(env, tokenData.access_token);
+    const sub = user.sub;
     if (state === "bind") {
       const { session } = await currentAdmin(request, env);
       if (!session) {
-        return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u5148\u767B\u5F55\u7BA1\u7406\u540E\u53F0\u540E\u518D\u7ED1\u5B9A GitHub\u3002", false, "/auth/login");
+        return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u5148\u767B\u5F55\u7BA1\u7406\u540E\u53F0\u540E\u518D\u7ED1\u5B9A SSO\u3002", false, "/auth/login");
       }
       const users2 = await ensureAdminUsers(env);
-      const existing = findLoginByOAuth(users2, "github", user.login);
+      const existing = findLoginByOAuth(users2, "sso", sub);
       if (existing && existing !== session.login) {
-        return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", `\u8BE5 GitHub \u8D26\u53F7\uFF08${user.login}\uFF09\u5DF2\u7ED1\u5B9A\u5230\u8D26\u53F7 ${existing}\u3002`, false, "/admin.html#/admin/profile");
+        return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", `\u8BE5 SSO \u8D26\u53F7\uFF08${user.name || sub}\uFF09\u5DF2\u7ED1\u5B9A\u5230\u8D26\u53F7 ${existing}\u3002`, false, "/admin.html#/admin/profile");
       }
       users2[session.login].oauth = users2[session.login].oauth || {};
-      users2[session.login].oauth.github = { login: user.login, name: user.name || user.login, boundAt: (/* @__PURE__ */ new Date()).toISOString() };
+      users2[session.login].oauth.sso = { sub, name: user.name || user.nickname || sub, avatar_url: user.picture || "", boundAt: (/* @__PURE__ */ new Date()).toISOString() };
       await writeAdminUsers(env, users2);
-      return new Response(null, { status: 302, headers: { Location: "/admin.html#/admin/profile?oauth=github&status=bound" } });
+      return new Response(null, { status: 302, headers: { Location: "/admin.html#/admin/profile?oauth=sso&status=bound" } });
     }
     const users = await ensureAdminUsers(env);
     let login = null;
-    const legacyRole = await getAdminRole(env, user.login);
-    if (legacyRole) login = user.login;
-    if (!login) login = findLoginByOAuth(users, "github", user.login);
+    const preferred = user.preferred_username || "";
+    const legacyRole = preferred ? await getAdminRole(env, preferred) : null;
+    if (legacyRole) login = preferred;
+    if (!login) login = findLoginByOAuth(users, "sso", sub);
     if (!login) {
-      return oauthResultPage("\u767B\u5F55\u5931\u8D25", `GitHub \u8D26\u53F7 ${user.login} \u672A\u7ED1\u5B9A\u4EFB\u4F55\u7BA1\u7406\u5458\u8D26\u53F7\u3002<br>\u8BF7\u5148\u7528\u8D26\u53F7\u5BC6\u7801\u767B\u5F55\uFF0C\u5728\u300C\u4E2A\u4EBA\u4E2D\u5FC3 \u2192 OAuth \u7ED1\u5B9A\u300D\u4E2D\u7ED1\u5B9A\u540E\u518D\u4F7F\u7528 GitHub \u767B\u5F55\u3002`, false);
+      return oauthResultPage("\u767B\u5F55\u5931\u8D25", `SSO \u8D26\u53F7 ${user.name || sub} \u672A\u7ED1\u5B9A\u4EFB\u4F55\u7BA1\u7406\u5458\u8D26\u53F7\u3002<br>\u8BF7\u5148\u7528\u8D26\u53F7\u5BC6\u7801\u767B\u5F55\uFF0C\u5728\u300C\u4E2A\u4EBA\u4E2D\u5FC3 \u2192 OAuth \u7ED1\u5B9A\u300D\u4E2D\u7ED1\u5B9A\u540E\u518D\u4F7F\u7528 SSO \u767B\u5F55\u3002`, false);
     }
     const admin = users[login];
     const role = admin.role;
-    const sessionToken = await createSession(env, { login, name: admin.name || login, role, avatar_url: user.avatar_url });
+    const sessionToken = await createSession(env, { login, name: admin.name || login, role, avatar_url: user.picture || null });
     let next = "/admin.html";
     if (state.startsWith("l:")) {
       const t = state.slice(2);
@@ -2020,7 +2053,6 @@ __name2(handleProfilePassword, "handleProfilePassword");
 __name22(handleProfilePassword, "handleProfilePassword");
 __name222(handleProfilePassword, "handleProfilePassword");
 __name2222(handleProfilePassword, "handleProfilePassword");
-var QQ_API_BASE = "http://u.0mz.cn/connect.php";
 function getBaseUrl(env) {
   return env.BASE_URL || "https://modpack-release.catkinr-93f.workers.dev";
 }
@@ -2035,6 +2067,7 @@ function findLoginByOAuth(users, provider, identity) {
     if (!o) continue;
     if (provider === "qq" && o.uid && o.uid === identity) return login;
     if (provider === "github" && o.login && o.login === identity) return login;
+    if (provider === "sso" && o.sub && o.sub === identity) return login;
   }
   return null;
 }
@@ -2047,7 +2080,8 @@ function oauthInfo(u) {
   const o = u && u.oauth || {};
   return {
     qq: o.qq ? { bound: true, nickname: o.qq.nickname || "", faceimg: o.qq.faceimg || "" } : null,
-    github: o.github ? { bound: true, login: o.github.login || "" } : null
+    github: o.github ? { bound: true, login: o.github.login || "" } : null,
+    sso: o.sso ? { bound: true, sub: o.sso.sub || "", name: o.sso.name || "" } : null
   };
 }
 __name(oauthInfo, "oauthInfo");
@@ -2071,27 +2105,12 @@ __name2(oauthResultPage, "oauthResultPage");
 __name22(oauthResultPage, "oauthResultPage");
 __name222(oauthResultPage, "oauthResultPage");
 __name2222(oauthResultPage, "oauthResultPage");
-async function qqApi(env, params) {
-  if (!env.QQ_APPID || !env.QQ_APPKEY) throw new Error("QQ \u805A\u5408\u767B\u5F55\u5C1A\u672A\u914D\u7F6E\uFF08QQ_APPID / QQ_APPKEY\uFF09");
-  const url = new URL(QQ_API_BASE);
-  url.searchParams.set("appid", env.QQ_APPID);
-  url.searchParams.set("appkey", env.QQ_APPKEY);
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const res = await fetch(url.toString());
-  const data = await res.json().catch(() => null);
-  if (!data) throw new Error("QQ \u63A5\u53E3\u65E0\u54CD\u5E94");
-  return data;
-}
-__name(qqApi, "qqApi");
-__name2(qqApi, "qqApi");
-__name22(qqApi, "qqApi");
-__name222(qqApi, "qqApi");
-__name2222(qqApi, "qqApi");
 async function handleQQLoginUrl(env) {
   try {
-    const data = await qqApi(env, { act: "login", type: "qq", redirect_uri: `${getBaseUrl(env)}/auth/qq/callback` });
-    if (data.code !== 0 || !data.url) throw new Error(data.msg || "\u83B7\u53D6 QQ \u767B\u5F55\u5730\u5740\u5931\u8D25");
-    return json({ url: data.url });
+    const missing = ssoCheck(env);
+    if (missing) throw new Error(missing);
+    const redirectUri = `${getBaseUrl(env)}/auth/callback`;
+    return json({ url: ssoAuthorizeUrl(env, redirectUri, `l:${randomHex(16)}`) });
   } catch (e) {
     return json({ error: e.message }, 500);
   }
@@ -2103,15 +2122,15 @@ __name222(handleQQLoginUrl, "handleQQLoginUrl");
 __name2222(handleQQLoginUrl, "handleQQLoginUrl");
 async function handleQQLogin(request, env) {
   try {
-    const data = await qqApi(env, { act: "login", type: "qq", redirect_uri: `${getBaseUrl(env)}/auth/qq/callback` });
-    if (data.code !== 0 || !data.url) throw new Error(data.msg || "\u83B7\u53D6 QQ \u767B\u5F55\u5730\u5740\u5931\u8D25");
+    const missing = ssoCheck(env);
+    if (missing) throw new Error(missing);
     const next = safeNext(new URL(request.url).searchParams.get("next"));
     const token = randomHex(16);
     await env.MODS_KV.put(`oauth:n:${token}`, next, { expirationTtl: 600 });
-    const sep = data.url.includes("?") ? "&" : "?";
-    return Response.redirect(`${data.url}${sep}state=l:${token}`, 302);
+    const redirectUri = `${getBaseUrl(env)}/auth/callback`;
+    return Response.redirect(ssoAuthorizeUrl(env, redirectUri, `l:${token}`), 302);
   } catch (e) {
-    return text("QQ \u767B\u5F55\u521D\u59CB\u5316\u5931\u8D25\uFF1A" + e.message, 500);
+    return text("SSO \u767B\u5F55\u521D\u59CB\u5316\u5931\u8D25\uFF1A" + e.message, 500);
   }
 }
 __name(handleQQLogin, "handleQQLogin");
@@ -2121,9 +2140,10 @@ __name222(handleQQLogin, "handleQQLogin");
 __name2222(handleQQLogin, "handleQQLogin");
 async function handleQQBindUrl(env) {
   try {
-    const data = await qqApi(env, { act: "login", type: "qq", redirect_uri: `${getBaseUrl(env)}/auth/qq/bind-callback` });
-    if (data.code !== 0 || !data.url) throw new Error(data.msg || "\u83B7\u53D6 QQ \u7ED1\u5B9A\u5730\u5740\u5931\u8D25");
-    return json({ url: data.url });
+    const missing = ssoCheck(env);
+    if (missing) throw new Error(missing);
+    const redirectUri = `${getBaseUrl(env)}/auth/callback`;
+    return json({ url: ssoAuthorizeUrl(env, redirectUri, "bind") });
   } catch (e) {
     return json({ error: e.message }, 500);
   }
@@ -2134,35 +2154,7 @@ __name22(handleQQBindUrl, "handleQQBindUrl");
 __name222(handleQQBindUrl, "handleQQBindUrl");
 __name2222(handleQQBindUrl, "handleQQBindUrl");
 async function handleQQCallback(request, env) {
-  try {
-    const code = new URL(request.url).searchParams.get("code");
-    if (!code) return oauthResultPage("\u767B\u5F55\u5931\u8D25", "\u7F3A\u5C11\u6388\u6743\u7801", false);
-    const data = await qqApi(env, { act: "callback", type: "qq", code });
-    if (data.code !== 0 || !data.social_uid) throw new Error(data.msg || "QQ \u767B\u5F55\u5931\u8D25");
-    const users = await ensureAdminUsers(env);
-    const login = findLoginByOAuth(users, "qq", data.social_uid);
-    if (!login) {
-      return oauthResultPage("\u767B\u5F55\u5931\u8D25", `\u8BE5 QQ\uFF08${data.nickname || data.social_uid}\uFF09\u672A\u7ED1\u5B9A\u4EFB\u4F55\u7BA1\u7406\u5458\u8D26\u53F7\u3002<br>\u8BF7\u5148\u7528\u8D26\u53F7\u5BC6\u7801\u767B\u5F55\uFF0C\u5728\u300C\u4E2A\u4EBA\u4E2D\u5FC3 \u2192 OAuth \u7ED1\u5B9A\u300D\u4E2D\u7ED1\u5B9A\u540E\u518D\u4F7F\u7528 QQ \u767B\u5F55\u3002`, false);
-    }
-    const admin = users[login];
-    if (admin.oauth && admin.oauth.qq && data.faceimg && admin.oauth.qq.faceimg !== data.faceimg) {
-      admin.oauth.qq.faceimg = data.faceimg;
-      await writeAdminUsers(env, users);
-    }
-    const token = await createSession(env, { login, name: admin.name || login, role: admin.role, avatar_url: data.faceimg || null });
-    let next = "/admin.html";
-    const state = new URL(request.url).searchParams.get("state") || "";
-    if (state.startsWith("l:")) {
-      const t = state.slice(2);
-      const stored = await env.MODS_KV.get(`oauth:n:${t}`);
-      if (stored) next = safeNext(stored);
-      await env.MODS_KV.delete(`oauth:n:${t}`).catch(() => {
-      });
-    }
-    return new Response(null, { status: 302, headers: { Location: next, "Set-Cookie": sessionCookie(token) } });
-  } catch (e) {
-    return oauthResultPage("\u767B\u5F55\u5931\u8D25", e.message, false);
-  }
+  return new Response(null, { status: 302, headers: { Location: "/auth/login" } });
 }
 __name(handleQQCallback, "handleQQCallback");
 __name2(handleQQCallback, "handleQQCallback");
@@ -2170,27 +2162,7 @@ __name22(handleQQCallback, "handleQQCallback");
 __name222(handleQQCallback, "handleQQCallback");
 __name2222(handleQQCallback, "handleQQCallback");
 async function handleQQBindCallback(request, env) {
-  try {
-    const { session } = await currentAdmin(request, env);
-    if (!session) {
-      return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u5148\u767B\u5F55\u7BA1\u7406\u540E\u53F0\u540E\u518D\u7ED1\u5B9A QQ\u3002", false, "/auth/login");
-    }
-    const code = new URL(request.url).searchParams.get("code");
-    if (!code) throw new Error("\u7F3A\u5C11\u6388\u6743\u7801");
-    const data = await qqApi(env, { act: "callback", type: "qq", code });
-    if (data.code !== 0 || !data.social_uid) throw new Error(data.msg || "QQ \u6388\u6743\u5931\u8D25");
-    const users = await ensureAdminUsers(env);
-    const existing = findLoginByOAuth(users, "qq", data.social_uid);
-    if (existing && existing !== session.login) {
-      return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", `\u8BE5 QQ\uFF08${data.nickname || data.social_uid}\uFF09\u5DF2\u7ED1\u5B9A\u5230\u8D26\u53F7 ${existing}\u3002`, false, "/admin.html#/admin/profile");
-    }
-    users[session.login].oauth = users[session.login].oauth || {};
-    users[session.login].oauth.qq = { uid: data.social_uid, nickname: data.nickname || "", faceimg: data.faceimg || "", boundAt: (/* @__PURE__ */ new Date()).toISOString() };
-    await writeAdminUsers(env, users);
-    return new Response(null, { status: 302, headers: { Location: "/admin.html#/admin/profile?oauth=qq&status=bound" } });
-  } catch (e) {
-    return oauthResultPage("\u7ED1\u5B9A\u5931\u8D25", e.message, false, "/admin.html#/admin/profile");
-  }
+  return new Response(null, { status: 302, headers: { Location: "/admin.html#/admin/profile" } });
 }
 __name(handleQQBindCallback, "handleQQBindCallback");
 __name2(handleQQBindCallback, "handleQQBindCallback");
@@ -2198,12 +2170,14 @@ __name22(handleQQBindCallback, "handleQQBindCallback");
 __name222(handleQQBindCallback, "handleQQBindCallback");
 __name2222(handleQQBindCallback, "handleQQBindCallback");
 async function handleGithubBindUrl(env) {
-  if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
-    return json({ error: "\u5C1A\u672A\u914D\u7F6E GitHub OAuth\uFF08GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET\uFF09" }, 400);
+  try {
+    const missing = ssoCheck(env);
+    if (missing) return json({ error: missing }, 400);
+    const redirectUri = `${getBaseUrl(env)}/auth/callback`;
+    return json({ url: ssoAuthorizeUrl(env, redirectUri, "bind") });
+  } catch (e) {
+    return json({ error: e.message }, 500);
   }
-  const redirectUri = `${getBaseUrl(env)}/auth/callback`;
-  const url = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(env.GITHUB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=read:user&state=bind`;
-  return json({ url });
 }
 __name(handleGithubBindUrl, "handleGithubBindUrl");
 __name2(handleGithubBindUrl, "handleGithubBindUrl");
@@ -2215,7 +2189,7 @@ async function handleOAuthUnbind(request, env) {
   if (!session) return json({ error: "\u672A\u767B\u5F55" }, 401);
   const body = await request.json().catch(() => null);
   const provider = String(body && body.provider || "");
-  if (provider !== "qq" && provider !== "github") return json({ error: "\u4E0D\u652F\u6301\u7684\u767B\u5F55\u65B9\u5F0F" }, 400);
+  if (provider !== "qq" && provider !== "github" && provider !== "sso") return json({ error: "\u4E0D\u652F\u6301\u7684\u767B\u5F55\u65B9\u5F0F" }, 400);
   const users = await ensureAdminUsers(env);
   if (!users[session.login]) return json({ error: "\u8D26\u53F7\u4E0D\u5B58\u5728" }, 404);
   if (users[session.login].oauth) delete users[session.login].oauth[provider];
@@ -4070,7 +4044,7 @@ var index_default = {
         const role = await getAdminRole(env, session.login);
         const users = await ensureAdminUsers(env);
         const admin = users[session.login] || {};
-        user = { login: session.login, name: session.name, role, avatar_url: session.avatar_url || admin.oauth && admin.oauth.qq && admin.oauth.qq.faceimg || null, oauth: oauthInfo(admin) };
+        user = { login: session.login, name: session.name, role, avatar_url: session.avatar_url || admin.oauth && (admin.oauth.qq && admin.oauth.qq.faceimg || admin.oauth.sso && admin.oauth.sso.avatar_url) || null, oauth: oauthInfo(admin) };
         isAdmin2 = role === ROLE_SUPER || role === ROLE_ADMIN;
         isSuper = role === ROLE_SUPER;
       }

@@ -22,12 +22,12 @@ database_id = "b838b9e7-5ca1-416d-a420-307be040acb7"
 [vars]
 ADMIN_LOGIN = "maoxinhe"
 BASE_URL = "https://releases.camzy.uno"
-GITHUB_CLIENT_ID = "Ov23lix8isGOSSoCOv1w"
 MAX_UPLOAD_MB = "100"
 REPO_BRANCH = "main"
 REPO_NAME = "modpack"
 REPO_OWNER = "maoxinhe"
 SESSION_TTL_HOURS = "168"
+SSO_CLIENT_ID = "mzy_jzsmzjxn8r5pujj8"
 # ---- 工单系统邮件（Resend HTTP API）----
 MAIL_FROM = "工单系统 <noreply@camzy.uno>"
 # 管理员收件邮箱（新工单通知）

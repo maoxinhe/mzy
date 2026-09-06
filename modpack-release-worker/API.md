@@ -16,7 +16,7 @@
 | 身份 | 说明 | 获取方式 |
 |---|---|---|
 | 匿名 | 可访问公开接口 | 无需认证 |
-| 管理员会话 | 通过 Cookie 会话（`mz_session`）识别 | 账号密码登录或 GitHub / QQ OAuth 登录 |
+| 管理员会话 | 通过 Cookie 会话（`mp_session`）识别 | 账号密码登录或 **SSO 统一登录**（sso.camzy.uno） |
 | API Token | 通过 `Authorization: Bearer mz_xxx` 请求头识别 | 超级管理员在管理后台生成 |
 
 ### 1.1 管理员会话
@@ -428,31 +428,35 @@ GET /api/error-reports/{id}?token=<poll.token>
 
 > 分析完成后会自动生成一条工单（`ticket_id`），并将报告发送至玩家邮箱。错误报告与工单数据存储在 D1，14 天后自动清理。
 
-### 2.17 QQ 登录地址（客户端跳转用）
+### 2.17 SSO 登录地址（客户端跳转用）
 
 ```
 GET /api/oauth/qq/login-url
 ```
 
-返回 `{ "url": "https://..." }`，前端可将用户 302 跳转到该地址完成 QQ 登录。
+返回 `{ "url": "https://..." }`，前端可将用户 302 跳转到该地址完成 SSO 统一登录（兼容旧调用名，实际指向自建 SSO 平台 sso.camzy.uno）。
 
 ---
 
-## 3. OAuth 登录流程（浏览器跳转）
+## 3. SSO 登录流程（浏览器跳转）
+
+第三方登录统一走自建 SSO 平台（`https://sso.camzy.uno`，标准 OAuth2 + OIDC）。Worker 仅作为 SSO 的一个 OAuth 客户端。
 
 | 路由 | 说明 |
 |---|---|
-| `GET /auth/login?next=/admin.html` | 跳转 GitHub 授权页（未配置 GITHUB_CLIENT_SECRET 时返回 400） |
-| `GET /auth/callback` | GitHub 回调（`state=bind` 时执行绑定，否则登录） |
-| `GET /auth/qq` | 跳转 QQ 授权页 |
-| `GET /auth/qq/callback` | QQ 登录回调 |
-| `GET /auth/qq/bind-callback` | QQ 绑定回调 |
+| `GET /auth/login?next=/admin.html` | 302 跳转 SSO 授权页 `sso.camzy.uno/oauth/authorize`（未配置 SSO_CLIENT_SECRET 时返回 400） |
+| `GET /auth/callback` | SSO 回调：`code` 换 token → 读取 userinfo → 按 `sub` 关联管理员并建立本站会话（`state=bind` 时执行绑定，否则登录） |
+| `GET /auth/qq` | 兼容旧入口，同样 302 到 SSO 授权页 |
+| `GET /auth/qq/callback` | 旧 QQ 回调，302 回 `/auth/login`（已迁移，SSO 不再回调此处） |
+| `GET /auth/qq/bind-callback` | 旧 QQ 绑定回调，302 回个人中心（已迁移） |
 | `GET /auth/logout` | 登出，302 回首页并清除 Cookie |
 
 说明：
 
-- GitHub / QQ 登录仅对**已绑定该 OAuth 账号的管理员**生效，未绑定账号跳转会显示错误页。
-- 绑定入口：登录管理后台后访问 `GET /api/oauth/qq/bind-url`、`GET /api/oauth/github/bind-url`（需管理员会话），得到授权 URL 后完成绑定。
+- SSO 登录仅对**已绑定 SSO 账号的管理员**生效（绑定关系存于管理员档案的 `oauth.sso.sub`），未绑定账号跳转会显示错误页。
+- 账号关联使用 SSO 的 `sub`（用户永久唯一 ID），不使用邮箱或昵称。
+- 绑定入口：登录管理后台后访问 `GET /api/oauth/qq/bind-url`、`GET /api/oauth/github/bind-url`（需管理员会话，两个接口现均返回 SSO 绑定授权 URL），得到授权 URL 后完成绑定。
+- 历史已绑定的 GitHub/QQ 账号（`oauth.github` / `oauth.qq`）仍保留展示，但登录时需通过 SSO 重新绑定。
 
 ---
 
@@ -640,10 +644,12 @@ POST /api/me/password    # 修改密码：{ "oldPassword": "...", "newPassword":
 ### 5.3 OAuth 绑定（管理员会话）
 
 ```
-GET  /api/oauth/qq/bind-url        # 返回 QQ 绑定授权 URL：{ "url": "..." }
-GET  /api/oauth/github/bind-url    # 返回 GitHub 绑定授权 URL：{ "url": "..." }
-POST /api/oauth/unbind             # 解绑：{ "provider": "qq" | "github" }
+GET  /api/oauth/qq/bind-url        # 返回 SSO 绑定授权 URL：{ "url": "..." }（兼容旧调用名）
+GET  /api/oauth/github/bind-url    # 返回 SSO 绑定授权 URL：{ "url": "..." }（兼容旧调用名）
+POST /api/oauth/unbind             # 解绑：{ "provider": "qq" | "github" | "sso" }
 ```
+
+> 绑定/解绑均针对 SSO（`provider: "sso"`，按 `sub` 关联）；`qq` / `github` 为历史数据兼容保留。
 
 ---
 
@@ -700,8 +706,8 @@ DELETE /api/admin/api-tokens/{id}     # 撤销
 |---|---|---|
 | `ADMIN_LOGIN` | `maoxinhe` | 默认管理员账号（首次初始化） |
 | `ADMIN_EMAIL` | `catkinr@qq.com` | 工单/错误报告通知默认收件邮箱 |
-| `BASE_URL` | `https://releases.camzy.uno` | 站点根地址（OAuth 回调拼接用） |
-| `GITHUB_CLIENT_ID` | `Ov23lix8isGOSSoCOv1w` | GitHub OAuth Client ID |
+| `BASE_URL` | `https://releases.camzy.uno` | 站点根地址（SSO 回调地址拼接用） |
+| `SSO_CLIENT_ID` | `mzy_jzsmzjxn8r5pujj8` | SSO 平台应用 ID |
 | `MAX_UPLOAD_MB` | `100` | 模组上传大小上限（MB） |
 | `REPO_OWNER` / `REPO_NAME` / `REPO_BRANCH` | `maoxinhe` / `modpack` / `main` | GitHub 仓库定位 |
 | `SESSION_TTL_HOURS` | `168` | 会话有效期（小时） |
@@ -714,9 +720,8 @@ DELETE /api/admin/api-tokens/{id}     # 撤销
 |---|---|
 | `GLM_API_KEY` | 智谱 GLM 大模型密钥（错误报告分析与工单 AI 回复） |
 | `RESEND_API_KEY` | Resend 邮件服务密钥（验证码 / 通知 / 报告） |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth 密钥 |
+| `SSO_CLIENT_SECRET` | SSO 平台应用密钥（OAuth 换 token） |
 | `GITHUB_TOKEN` | GitHub API 令牌（版本检测 / 发布 / 模组读写） |
-| `QQ_APPKEY` | QQ 互联应用密钥（QQ 登录） |
 
 ---
 
