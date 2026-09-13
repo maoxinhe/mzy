@@ -1,0 +1,6 @@
+# Wrangler 本地开发密钥（勿提交）
+.dev.vars
+# 本地模拟运行状态
+.wrangler/
+# 依赖
+node_modules/

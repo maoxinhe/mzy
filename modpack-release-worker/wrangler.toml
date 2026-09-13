@@ -27,7 +27,7 @@ REPO_BRANCH = "main"
 REPO_NAME = "modpack"
 REPO_OWNER = "maoxinhe"
 SESSION_TTL_HOURS = "168"
-SSO_CLIENT_ID = "mzy_jzsmzjxn8r5pujj8"
+SSO_CLIENT_ID = "mzy_qe5ohbgf5pnt84pp"
 # ---- 工单系统邮件（Resend HTTP API）----
 MAIL_FROM = "工单系统 <noreply@camzy.uno>"
 # 管理员收件邮箱（新工单通知）
