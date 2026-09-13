@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>梦之韵 · API 文档</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.md-body{line-height:1.8;}
+.md-body h1{font-size:30px;margin:0 0 6px;}
+.md-body h2{font-size:22px;margin:36px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--border);}
+.md-body h3{font-size:17px;margin:24px 0 10px;}
+.md-body h4{font-size:15px;margin:18px 0 8px;color:var(--primary-dark);}
+.md-body p{margin:8px 0;color:var(--text);}
+.md-body strong{color:var(--text);}
+.md-body a{color:var(--primary-dark);}
+.md-body ul,.md-body ol{margin:8px 0 8px 22px;padding:0;}
+.md-body li{margin:4px 0;}
+.md-body code{background:rgba(157,134,255,.12);color:#6d56d6;padding:2px 6px;border-radius:6px;font-size:13px;}
+.md-body pre{background:#1e1b2e;color:#e8e6f5;padding:14px 16px;border-radius:12px;overflow-x:auto;margin:10px 0;}
+.md-body pre code{background:none;color:inherit;padding:0;}
+.md-body table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px;background:rgba(255,255,255,.5);}
+.md-body th{background:linear-gradient(135deg,#ff8fb3,#ff5c8a);color:#fff;padding:9px 12px;text-align:left;font-weight:700;}
+.md-body td{padding:8px 12px;border:1px solid var(--border);}
+.md-body tr:nth-child(even) td{background:rgba(255,255,255,.35);}
+.md-body blockquote{border-left:4px solid #ff8fb3;margin:10px 0;padding:6px 14px;background:rgba(255,143,179,.08);border-radius:0 10px 10px 0;color:var(--muted);}
+.md-body hr{border:none;border-top:1px dashed var(--border);margin:22px 0;}
+.md-toc{columns:2;gap:18px;background:rgba(157,134,255,.06);border:1px solid rgba(157,134,255,.25);border-radius:12px;padding:14px 18px;font-size:14px;margin-bottom:26px;}
+.md-toc a{display:block;padding:3px 0;color:var(--text);text-decoration:none;}
+.md-toc a:hover{color:var(--primary-dark);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="logo">📚</span><span>梦之韵 API 文档 <small>接口参考 · 版本检测 · 工单 · 后台</small></span></div>
+  <nav class="nav-links">
+    <a href="/">下载</a>
+    <a href="/ticket">工单</a>
+    <a href="/error-report">错误报告</a>
+    <a href="/api-docs" class="active">API 文档</a>
+  </nav>
+  <div class="topbar-actions"><a href="/admin" class="btn btn-sm hide-m">管理后台</a></div>
+  <button class="nav-toggle" id="navToggle" aria-label="菜单" aria-expanded="false">☰</button>
+</div>
+<div class="nav-fold" id="navFold">
+  <a href="/">🏠 下载页</a>
+  <a href="/ticket">🎫 提交工单</a>
+  <a href="/error-report">📤 错误报告</a>
+  <a href="/api-docs">📚 API 文档</a>
+  <a href="/admin">⚙️ 管理后台</a>
+</div>
+<div class="container">
+  <div class="hero" style="padding-bottom:14px;">
+    <div class="ver-badge" style="font-size:38px;">API 文档</div>
+    <div class="sub">模组包发布系统全部接口参考：认证、公共接口、管理接口、错误码、环境变量与数据存储。</div>
+  </div>
+  <div class="card" style="padding:28px 30px;">
+    <div class="md-body"><h1>梦之韵模组包发布系统 · API 指南</h1>
+<p>本 Worker 部署于 Cloudflare Workers，对外提供「模组包发布 / 版本检测 / 工单系统 / 错误报告分析」四大能力。</p>
+<ul>
+<li><strong>生产域名</strong>：<code>https://releases.camzy.uno</code></li>
+<li><strong>Workers 直连域名</strong>：<code>https://modpack-release.catkinr-93f.workers.dev</code>（与生产域名行为一致，主要用于调试）</li>
+<li>所有接口返回 <code>application/json; charset=utf-8</code>（OAuth 跳转与静态资源除外）</li>
+<li>成功响应统一为 <code>{ &quot;ok&quot;: true, ... }</code>；失败响应统一为 <code>{ &quot;error&quot;: &quot;&lt;原因&gt;&quot; }</code></li>
+</ul>
+<hr>
+<h2>1. 认证方式</h2>
+<p>系统支持三种身份：</p>
+<table>
+<thead>
+<tr>
+<th>身份</th>
+<th>说明</th>
+<th>获取方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>匿名</td>
+<td>可访问公开接口</td>
+<td>无需认证</td>
+</tr>
+<tr>
+<td>管理员会话</td>
+<td>通过 Cookie 会话（<code>mp_session</code>）识别</td>
+<td>账号密码登录或 <strong>SSO 统一登录</strong>（sso.camzy.uno）</td>
+</tr>
+<tr>
+<td>API Token</td>
+<td>通过 <code>Authorization: Bearer mz_xxx</code> 请求头识别</td>
+<td>超级管理员在管理后台生成</td>
+</tr>
+</tbody></table>
+<h3>1.1 管理员会话</h3>
+<ul>
+<li>登录成功后服务端通过 <code>Set-Cookie</code> 下发会话 Cookie（键名 <code>mp_session</code>），后续请求携带该 Cookie 即视为已登录。</li>
+<li>会话有效期由 <code>SESSION_TTL_HOURS</code> 控制（默认 168 小时）。</li>
+<li>角色：<code>super</code>（超级管理员）/ <code>admin</code>（管理员）。</li>
+</ul>
+<h3>1.2 API Token</h3>
+<ul>
+<li>格式：<code>mz_</code> 开头 + 60 位十六进制随机串。</li>
+<li>用法：<code>Authorization: Bearer mz_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code></li>
+<li>仅对标注为「管理员 或 Token」的接口生效；标注「仅管理员会话」的接口不接受 Token。</li>
+<li>Token 管理见 <a href="#64-api-token-%E7%AE%A1%E7%90%86">6.4 API Token 管理</a>。</li>
+</ul>
+<h3>1.3 认证级别速查</h3>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>公开</td>
+<td>无需认证</td>
+</tr>
+<tr>
+<td>管理员 或 Token</td>
+<td>会话是 super/admin，<strong>或</strong> Bearer 为有效 API Token</td>
+</tr>
+<tr>
+<td>仅管理员会话</td>
+<td>会话是 super/admin（Token 无效）</td>
+</tr>
+<tr>
+<td>仅超级管理员</td>
+<td>会话是 super</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 公共接口（无需认证）</h2>
+<h3>2.1 模组列表</h3>
+<pre><code>GET /api/mods
+</code></pre>
+<p>返回当前模组包内所有模组（从 GitHub 仓库读取）。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{
+  &quot;mods&quot;: [
+    { &quot;name&quot;: &quot;create-1.21.1-6.0.10.jar&quot;, &quot;size&quot;: 19127040, &quot;mtime&quot;: &quot;2026-09-05T08:57:21Z&quot; }
+  ]
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mods[].name</code></td>
+<td>string</td>
+<td>模组文件名</td>
+</tr>
+<tr>
+<td><code>mods[].size</code></td>
+<td>number</td>
+<td>字节大小</td>
+</tr>
+<tr>
+<td><code>mods[].mtime</code></td>
+<td>string</td>
+<td>最后修改时间</td>
+</tr>
+</tbody></table>
+<h3>2.2 镜像列表</h3>
+<pre><code>GET /api/mirrors
+GET /api/mirrors?test=1
+</code></pre>
+<p>返回模组包 zip 的下载镜像地址。<code>?test=1</code> 时会对每个镜像做连通性测试，额外返回 <code>ok</code> / <code>error</code> / <code>latencyMs</code> 字段。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{
+  &quot;mirrors&quot;: [
+    { &quot;name&quot;: &quot;GitHub&quot;, &quot;url&quot;: &quot;https://github.com/maoxinhe/modpack/releases/latest/download/modpack.zip&quot; }
+  ]
+}
+</code></pre>
+<h3>2.3 最新版本（启动器版本检测）</h3>
+<pre><code>GET /api/releases/latest
+</code></pre>
+<p>从 GitHub Releases API（携带 <code>GITHUB_TOKEN</code>）读取最新发布，同时返回本地缓存的发布状态。<strong>这是客户端（启动器）检测新版本的推荐接口。</strong></p>
+<p>响应示例：</p>
+<pre><code class="language-json">{
+  &quot;release&quot;: {
+    &quot;tag_name&quot;: &quot;v1.0.10&quot;,
+    &quot;name&quot;: &quot;梦之韵模组包 v1.0.10&quot;,
+    &quot;published_at&quot;: &quot;2026-09-05T08:57:16Z&quot;,
+    &quot;html_url&quot;: &quot;https://github.com/maoxinhe/modpack/releases/tag/v1.0.10&quot;,
+    &quot;body&quot;: &quot;## 梦之韵模组包 v1.0.10\n\n共 40 个模组：...&quot;,
+    &quot;assets&quot;: [
+      { &quot;name&quot;: &quot;modpack.zip&quot;, &quot;browser_download_url&quot;: &quot;https://github.com/maoxinhe/modpack/releases/download/v1.0.10/modpack.zip&quot;, &quot;size&quot;: 69996671 }
+    ]
+  },
+  &quot;state&quot;: {
+    &quot;currentVersion&quot;: &quot;1.0.10&quot;,
+    &quot;lastPublishAt&quot;: &quot;2026-09-05T08:57:21.957Z&quot;,
+    &quot;lastReleaseId&quot;: 383191859,
+    &quot;lastReleaseTag&quot;: &quot;v1.0.10&quot;
+  }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>release</code></td>
+<td>object | null</td>
+<td>最新发布；无发布时为 <code>null</code></td>
+</tr>
+<tr>
+<td><code>release.assets[].browser_download_url</code></td>
+<td>string</td>
+<td>直接下载地址（模组包 zip / 更新器 exe）</td>
+</tr>
+<tr>
+<td><code>state.currentVersion</code></td>
+<td>string</td>
+<td>本地缓存的最新版本号（不带 <code>v</code> 前缀）</td>
+</tr>
+</tbody></table>
+<h3>2.4 版本列表</h3>
+<pre><code>GET /api/releases
+</code></pre>
+<p>响应示例：</p>
+<pre><code class="language-json">{
+  &quot;releases&quot;: [
+    {
+      &quot;id&quot;: 383191859,
+      &quot;tag&quot;: &quot;v1.0.10&quot;,
+      &quot;name&quot;: &quot;梦之韵模组包 v1.0.10&quot;,
+      &quot;published_at&quot;: &quot;2026-09-05T08:57:16Z&quot;,
+      &quot;html_url&quot;: &quot;https://github.com/maoxinhe/modpack/releases/tag/v1.0.10&quot;,
+      &quot;assets&quot;: [
+        { &quot;name&quot;: &quot;modpack.zip&quot;, &quot;url&quot;: &quot;https://github.com/maoxinhe/modpack/releases/download/v1.0.10/modpack.zip&quot;, &quot;size&quot;: 69996671 }
+      ]
+    }
+  ]
+}
+</code></pre>
+<h3>2.5 版本详情</h3>
+<pre><code>GET /api/releases/{id}
+</code></pre>
+<p><code>{id}</code> 为 GitHub Release 数字 ID。响应较列表多返回 <code>body</code>、每个资产的 <code>download_count</code>。</p>
+<h3>2.6 工单：查询官方邮箱</h3>
+<pre><code>GET /api/ticket-info
+</code></pre>
+<p>返回工单系统官方发件邮箱列表（用于客户端提示&quot;邮件来自哪个地址&quot;）。</p>
+<pre><code class="language-json">{ &quot;official&quot;: [&quot;noreply@camzy.uno&quot;] }
+</code></pre>
+<h3>2.7 工单：提交（第一步，获取邮箱验证码）</h3>
+<pre><code>POST /api/tickets
+Content-Type: application/json
+</code></pre>
+<p>请求体：</p>
+<pre><code class="language-json">{
+  &quot;nickname&quot;: &quot;玩家昵称&quot;,
+  &quot;gamename&quot;: &quot;梦之韵&quot;,
+  &quot;email&quot;: &quot;player@example.com&quot;,
+  &quot;content&quot;: &quot;加载世界时崩溃&quot;
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>限制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>nickname</code></td>
+<td>必填，≤ 20 字符</td>
+</tr>
+<tr>
+<td><code>gamename</code></td>
+<td>必填，≤ 40 字符</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>必填，合法邮箱格式</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>必填，≤ 5000 字符</td>
+</tr>
+</tbody></table>
+<p>行为：向 <code>email</code> 发送 6 位验证码（10 分钟内有效），返回：</p>
+<pre><code class="language-json">{ &quot;ok&quot;: true, &quot;message&quot;: &quot;验证码已发送到 player@example.com，请在 10 分钟内填写&quot; }
+</code></pre>
+<h3>2.8 工单：验证并创建（第二步）</h3>
+<pre><code>POST /api/tickets/verify
+Content-Type: application/json
+</code></pre>
+<p>请求体：</p>
+<pre><code class="language-json">{ &quot;email&quot;: &quot;player@example.com&quot;, &quot;code&quot;: &quot;123456&quot; }
+</code></pre>
+<p>验证码正确后创建工单，<strong>并触发 AI 自动处理</strong>（根据 wiki 知识库尝试自动回复，判断不充分则保持人工处理）。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{ &quot;ok&quot;: true, &quot;id&quot;: &quot;T20260906-143025123&quot;, &quot;message&quot;: &quot;工单提交成功&quot; }
+</code></pre>
+<p>工单 ID 格式：<code>T&lt;年月日&gt;-&lt;时分秒&gt;&lt;3位随机&gt;</code>。</p>
+<p>工单状态机：<code>new</code>（待处理）→ <code>replied</code>（已回复）→ <code>closed</code>（已关闭）；AI 判定自动回复成立时标记为 <code>auto</code>。玩家追加留言时 <code>auto</code>/<code>closed</code> 会重新变为 <code>new</code>。</p>
+<h3>2.9 工单：查询进度</h3>
+<pre><code>GET /api/tickets/{id}?email=player@example.com
+</code></pre>
+<p>以提交工单时的邮箱作为凭证查询（邮箱不匹配返回 403）。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{
+  &quot;ticket&quot;: {
+    &quot;id&quot;: &quot;T20260906-143025123&quot;,
+    &quot;gamename&quot;: &quot;梦之韵&quot;,
+    &quot;status&quot;: &quot;replied&quot;,
+    &quot;createdAt&quot;: &quot;2026-09-06T06:30:25.000Z&quot;,
+    &quot;content&quot;: &quot;加载世界时崩溃&quot;,
+    &quot;replies&quot;: [
+      { &quot;from&quot;: &quot;admin&quot;, &quot;content&quot;: &quot;请提供崩溃日志&quot;, &quot;at&quot;: &quot;2026-09-06T07:00:00.000Z&quot; }
+    ]
+  }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ticket.status</code></td>
+<td><code>new</code> / <code>replied</code> / <code>closed</code> / <code>auto</code></td>
+</tr>
+<tr>
+<td><code>ticket.replies[].from</code></td>
+<td><code>admin</code> 或 <code>user</code></td>
+</tr>
+</tbody></table>
+<h3>2.10 工单：追加留言</h3>
+<pre><code>POST /api/tickets/{id}/message
+Content-Type: application/json
+</code></pre>
+<p>请求体：</p>
+<pre><code class="language-json">{ &quot;email&quot;: &quot;player@example.com&quot;, &quot;content&quot;: &quot;补充：我用的 Java 21&quot; }
+</code></pre>
+<p>校验逻辑同查询接口（邮箱必须匹配）。成功后通知管理员收件邮箱（见 <a href="#63-%E9%80%9A%E7%9F%A5%E9%82%AE%E7%AE%B1%E7%AE%A1%E7%90%86">6.3 通知邮箱管理</a>）。</p>
+<h3>2.11 当前用户信息</h3>
+<pre><code>GET /api/me
+</code></pre>
+<p>携带会话 Cookie 时返回登录信息，否则返回 <code>user: null</code>。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{
+  &quot;user&quot;: {
+    &quot;login&quot;: &quot;maoxinhe&quot;,
+    &quot;name&quot;: &quot;maoxinhe&quot;,
+    &quot;role&quot;: &quot;super&quot;,
+    &quot;avatar_url&quot;: &quot;https://...&quot;,
+    &quot;oauth&quot;: { &quot;qq&quot;: { &quot;uid&quot;: &quot;...&quot;, &quot;nickname&quot;: &quot;...&quot;, &quot;faceimg&quot;: &quot;...&quot;, &quot;boundAt&quot;: &quot;...&quot; } }
+  },
+  &quot;isAdmin&quot;: true,
+  &quot;isSuper&quot;: true
+}
+</code></pre>
+<h3>2.12 账号密码登录</h3>
+<pre><code>POST /api/auth/login
+Content-Type: application/json
+</code></pre>
+<p>请求体：</p>
+<pre><code class="language-json">{ &quot;username&quot;: &quot;maoxinhe&quot;, &quot;password&quot;: &quot;********&quot; }
+</code></pre>
+<ul>
+<li>成功：<code>Set-Cookie</code> 写入会话，返回 <code>{ &quot;ok&quot;: true, &quot;user&quot;: { &quot;login&quot;, &quot;name&quot;, &quot;role&quot; } }</code></li>
+<li>失败：<code>401 { &quot;error&quot;: &quot;账号或密码错误&quot; }</code></li>
+<li>同一账号+IP 连续失败 8 次后锁定 10 分钟：<code>429</code></li>
+</ul>
+<h3>2.13 错误报告：发送邮箱验证码</h3>
+<pre><code>POST /api/error-reports/verify
+Content-Type: application/json
+</code></pre>
+<p>请求体：</p>
+<pre><code class="language-json">{ &quot;email&quot;: &quot;player@example.com&quot;, &quot;nickname&quot;: &quot;玩家昵称&quot; }
+</code></pre>
+<p>限流策略：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>默认限制</th>
+<th>窗口</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同一 IP</td>
+<td>5 次</td>
+<td>1 小时</td>
+</tr>
+<tr>
+<td>同一邮箱</td>
+<td>5 次</td>
+<td>1 小时</td>
+</tr>
+<tr>
+<td>同一邮箱冷却</td>
+<td>1 次</td>
+<td>1 分钟</td>
+</tr>
+</tbody></table>
+<p>被限流时返回 <code>429</code>，并带 <code>retry_after</code> 与 <code>Retry-After</code> 头。</p>
+<h3>2.14 错误报告：绑定用户 ID 与邮箱</h3>
+<pre><code>POST /api/error-reports/bind
+Content-Type: application/json
+</code></pre>
+<p>请求体：</p>
+<pre><code class="language-json">{ &quot;id&quot;: &quot;客户端随机生成的用户ID&quot;, &quot;email&quot;: &quot;player@example.com&quot;, &quot;code&quot;: &quot;123456&quot; }
+</code></pre>
+<p>验证码通过后，将该用户 ID 与邮箱绑定（默认 30 天有效），之后上传时携带 <code>id</code> 字段即可免验证码。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{ &quot;ok&quot;: true, &quot;id&quot;: &quot;abc123&quot;, &quot;email&quot;: &quot;player@example.com&quot;, &quot;message&quot;: &quot;邮箱验证成功，已绑定&quot;, &quot;ttl_days&quot;: 30 }
+</code></pre>
+<h3>2.15 错误报告：上传（multipart/form-data）</h3>
+<pre><code>POST /api/error-reports
+Content-Type: multipart/form-data
+</code></pre>
+<p>表单字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>必填</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>file</code></td>
+<td>是</td>
+<td>崩溃日志 zip（仅 <code>.zip</code>，默认 ≤ 20MB）</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>是</td>
+<td>玩家邮箱（合法格式）</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>否</td>
+<td>已绑定的用户 ID（与邮箱匹配时免验证码）</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td>条件必填</td>
+<td>邮箱验证码（未绑定或绑定不匹配时必须）</td>
+</tr>
+<tr>
+<td><code>nickname</code></td>
+<td>否</td>
+<td>昵称，≤ 20 字符，默认&quot;玩家&quot;</td>
+</tr>
+<tr>
+<td><code>gamename</code></td>
+<td>否</td>
+<td>游戏名，≤ 40 字符</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>否</td>
+<td>问题描述，≤ 2000 字符</td>
+</tr>
+</tbody></table>
+<p>限流：同一 IP 与同一邮箱各 3 次/小时（可配）；队列满（默认 20）返回 429。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{
+  &quot;ok&quot;: true,
+  &quot;report_id&quot;: &quot;ERMTNLXZQ4BAEA165D&quot;,
+  &quot;status&quot;: &quot;queued&quot;,
+  &quot;message&quot;: &quot;上传成功，已入队等待分析...&quot;,
+  &quot;poll&quot;: {
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;path&quot;: &quot;/api/error-reports/ERMTNLXZQ4BAEA165D&quot;,
+    &quot;token&quot;: &quot;e9f2a1c4b3d5...&quot;
+  },
+  &quot;ttl_hours&quot;: 168
+}
+</code></pre>
+<blockquote>
+<p><code>report_id</code> 以 <code>ER</code> 开头。客户端应保存 <code>poll.token</code> 用于轮询结果。</p>
+</blockquote>
+<h3>2.16 错误报告：查询分析结果</h3>
+<pre><code>GET /api/error-reports/{id}?token=&lt;poll.token&gt;
+</code></pre>
+<p><code>token</code> 也可通过请求头 <code>X-Report-Token</code> 传递。token 错误返回 403。</p>
+<p>响应示例（分析完成时）：</p>
+<pre><code class="language-json">{
+  &quot;ok&quot;: true,
+  &quot;report_id&quot;: &quot;ERMTNLXZQ4BAEA165D&quot;,
+  &quot;status&quot;: &quot;done&quot;,
+  &quot;created_at&quot;: &quot;2026-09-04T23:51:17.788Z&quot;,
+  &quot;updated_at&quot;: &quot;2026-09-05T11:17:41.984Z&quot;,
+  &quot;ticket_id&quot;: &quot;T20260905-111741502&quot;,
+  &quot;result&quot;: &quot;# Minecraft 模组包崩溃分析报告\n\n## 基础信息\n...&quot;,
+  &quot;error&quot;: null
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>queued</code></td>
+<td>已入队，等待分析</td>
+</tr>
+<tr>
+<td><code>processing</code></td>
+<td>分析中</td>
+</tr>
+<tr>
+<td><code>done</code></td>
+<td>完成，<code>result</code> 为 Markdown 分析报告</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>失败，<code>error</code> 字段为失败原因</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>分析完成后会自动生成一条工单（<code>ticket_id</code>），并将报告发送至玩家邮箱。错误报告与工单数据存储在 D1，14 天后自动清理。</p>
+</blockquote>
+<h3>2.17 SSO 登录地址（客户端跳转用）</h3>
+<pre><code>GET /api/oauth/qq/login-url
+</code></pre>
+<p>返回 <code>{ &quot;url&quot;: &quot;https://...&quot; }</code>，前端可将用户 302 跳转到该地址完成 SSO 统一登录（兼容旧调用名，实际指向自建 SSO 平台 sso.camzy.uno）。</p>
+<hr>
+<h2>3. SSO 登录流程（浏览器跳转）</h2>
+<p>第三方登录统一走自建 SSO 平台（<code>https://sso.camzy.uno</code>，标准 OAuth2 + OIDC）。Worker 仅作为 SSO 的一个 OAuth 客户端。</p>
+<table>
+<thead>
+<tr>
+<th>路由</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /auth/login?next=/admin.html</code></td>
+<td>302 跳转 SSO 授权页 <code>sso.camzy.uno/oauth/authorize</code>（未配置 SSO_CLIENT_SECRET 时返回 400）</td>
+</tr>
+<tr>
+<td><code>GET /auth/callback</code></td>
+<td>SSO 回调：<code>code</code> 换 token → 读取 userinfo → 按 <code>sub</code> 关联管理员并建立本站会话（<code>state=bind</code> 时执行绑定，否则登录）</td>
+</tr>
+<tr>
+<td><code>GET /auth/qq</code></td>
+<td>兼容旧入口，同样 302 到 SSO 授权页</td>
+</tr>
+<tr>
+<td><code>GET /auth/qq/callback</code></td>
+<td>旧 QQ 回调，302 回 <code>/auth/login</code>（已迁移，SSO 不再回调此处）</td>
+</tr>
+<tr>
+<td><code>GET /auth/qq/bind-callback</code></td>
+<td>旧 QQ 绑定回调，302 回个人中心（已迁移）</td>
+</tr>
+<tr>
+<td><code>GET /auth/logout</code></td>
+<td>登出，302 回首页并清除 Cookie</td>
+</tr>
+</tbody></table>
+<p>说明：</p>
+<ul>
+<li>SSO 登录仅对<strong>已绑定 SSO 账号的管理员</strong>生效（绑定关系存于管理员档案的 <code>oauth.sso.sub</code>），未绑定账号跳转会显示错误页。</li>
+<li>账号关联使用 SSO 的 <code>sub</code>（用户永久唯一 ID），不使用邮箱或昵称。</li>
+<li>绑定入口：登录管理后台后访问 <code>GET /api/oauth/qq/bind-url</code>、<code>GET /api/oauth/github/bind-url</code>（需管理员会话，两个接口现均返回 SSO 绑定授权 URL），得到授权 URL 后完成绑定。</li>
+<li>历史已绑定的 GitHub/QQ 账号（<code>oauth.github</code> / <code>oauth.qq</code>）仍保留展示，但登录时需通过 SSO 重新绑定。</li>
+</ul>
+<hr>
+<h2>4. 管理接口（管理员 或 Token）</h2>
+<p>除特别标注外，以下接口均支持「管理员会话」或「<code>Authorization: Bearer mz_xxx</code>」两种方式。</p>
+<h3>4.1 管理统计</h3>
+<pre><code>GET /api/admin/stats
+</code></pre>
+<pre><code class="language-json">{
+  &quot;stats&quot;: {
+    &quot;mods&quot;: 40,
+    &quot;releases&quot;: 5,
+    &quot;tickets&quot;: 10,
+    &quot;pendingTickets&quot;: 2,
+    &quot;currentVersion&quot;: &quot;1.0.10&quot;,
+    &quot;lastReleaseTag&quot;: &quot;v1.0.10&quot;
+  },
+  &quot;recentReleases&quot;: [
+    { &quot;id&quot;: 383191859, &quot;tag&quot;: &quot;v1.0.10&quot;, &quot;name&quot;: &quot;...&quot;, &quot;published_at&quot;: &quot;...&quot;, &quot;html_url&quot;: &quot;...&quot; }
+  ],
+  &quot;recentTickets&quot;: [
+    { &quot;id&quot;: &quot;T...&quot;, &quot;nickname&quot;: &quot;...&quot;, &quot;gamename&quot;: &quot;...&quot;, &quot;status&quot;: &quot;new&quot;, &quot;createdAt&quot;: &quot;...&quot; }
+  ]
+}
+</code></pre>
+<h3>4.2 模组管理</h3>
+<pre><code>GET    /api/admin/mods                          # 模组完整列表（含 size/mtime）
+POST   /api/admin/mods                          # 上传 .jar 或 .zip（自动解压提取 mods/ 下 jar）
+POST   /api/admin/mods/rename                   # 重命名
+DELETE /api/admin/mods/{name}                   # 删除（name 需 URL 编码）
+</code></pre>
+<p><strong>上传</strong>（multipart/form-data）：字段 <code>file</code>，支持 <code>.jar</code> 或 <code>.zip</code>（zip 自动解压提取 <code>mods/</code> 目录下的 jar），单文件默认 ≤ 100MB。上传成功后自动触发打包发布。</p>
+<p>响应示例：</p>
+<pre><code class="language-json">{ &quot;ok&quot;: true, &quot;count&quot;: 2, &quot;mods&quot;: [ { &quot;name&quot;: &quot;a.jar&quot;, &quot;size&quot;: 1234 } ], &quot;publish&quot;: { &quot;ok&quot;: true } }
+</code></pre>
+<p><strong>重命名</strong> 请求体：</p>
+<pre><code class="language-json">{ &quot;oldName&quot;: &quot;old.jar&quot;, &quot;newName&quot;: &quot;new.jar&quot; }
+</code></pre>
+<h3>4.3 导入 mrpack 模组包</h3>
+<pre><code>POST /api/admin/mrpack
+Content-Type: multipart/form-data
+</code></pre>
+<p>字段：<code>file</code>（<code>.mrpack</code> 或 <code>.zip</code>）、可选 <code>message</code>（发布说明，≤500 字符）。</p>
+<p>行为：</p>
+<ol>
+<li>解析 <code>modrinth.index.json</code>，筛选 <code>mods/</code> 下的 <code>.jar</code>；</li>
+<li>按清单地址下载并校验 SHA-1/SHA-512 哈希；</li>
+<li>删除仓库现有模组后写入新模组；</li>
+<li>自动打包发布。</li>
+</ol>
+<p>响应示例：</p>
+<pre><code class="language-json">{ &quot;ok&quot;: true, &quot;downloaded&quot;: 40, &quot;failed&quot;: 0, &quot;mods&quot;: [ { &quot;name&quot;: &quot;a.jar&quot;, &quot;size&quot;: 100, &quot;ok&quot;: true } ], &quot;publish&quot;: { &quot;ok&quot;: true } }
+</code></pre>
+<p>部分失败时返回 <code>failed</code> 与 <code>errors</code>；全部失败返回 <code>502</code>。</p>
+<h3>4.4 手动发布</h3>
+<pre><code>POST /api/admin/publish
+Content-Type: application/json
+</code></pre>
+<p>请求体（可选）：</p>
+<pre><code class="language-json">{ &quot;message&quot;: &quot;本次更新内容&quot; }
+</code></pre>
+<p>将当前模组列表打包（zip + 更新器），版本号自动 <code>bump</code>，创建 GitHub Release（tag <code>v&lt;版本&gt;</code>），并生成 <code>modpack.zip</code> / <code>mods-&lt;版本&gt;.zip</code> / <code>mod-updater.exe</code> 资产。</p>
+<h3>4.5 版本回滚</h3>
+<pre><code>POST /api/admin/releases/rollback
+Content-Type: application/json
+</code></pre>
+<p>请求体：</p>
+<pre><code class="language-json">{ &quot;id&quot;: 383191859, &quot;tag&quot;: &quot;v1.0.9&quot; }
+</code></pre>
+<p>将指定 Release 的模组包资产解包回滚到仓库（删除当前所有模组，写入目标版本模组），随后重新发布。<code>tag</code> 可选，默认使用目标 release 的 tag。</p>
+<h3>4.6 删除版本</h3>
+<pre><code>DELETE /api/admin/releases/{id}
+</code></pre>
+<p>删除 GitHub Release 及其 tag，并刷新本地缓存状态（回退到最新一个可用版本）。</p>
+<h3>4.7 工单管理</h3>
+<pre><code>GET    /api/admin/tickets                                  # 工单列表
+GET    /api/admin/tickets/{id}                             # 工单详情（完整对象，含 replies）
+POST   /api/admin/tickets/{id}/reply                       # 管理员回复
+POST   /api/admin/tickets/{id}/close                       # 关闭工单
+POST   /api/admin/tickets/{id}/reopen                      # 重新打开
+POST   /api/admin/tickets/{id}/ai                          # AI 生成回复草稿
+DELETE /api/admin/tickets/{id}                             # 删除工单
+</code></pre>
+<ul>
+<li><strong>回复</strong> 请求体：<code>{ &quot;content&quot;: &quot;...&quot; }</code>，回复后状态变为 <code>replied</code>（已关闭的不再改动），并通过邮件通知玩家。</li>
+<li><strong>关闭</strong>：状态置为 <code>closed</code>，邮件通知玩家。</li>
+<li><strong>AI 草稿</strong>：基于 wiki 知识库调用 GLM 生成回复草稿，返回：</li>
+</ul>
+<pre><code class="language-json">{ &quot;ok&quot;: true, &quot;draft&quot;: &quot;您好，根据知识库...&quot;, &quot;model&quot;: &quot;glm-4.7-flash&quot;, &quot;sources&quot;: [...] }
+</code></pre>
+<h3>4.8 工单列表响应示例</h3>
+<pre><code class="language-json">{
+  &quot;tickets&quot;: [
+    {
+      &quot;id&quot;: &quot;T20260906-143025123&quot;,
+      &quot;nickname&quot;: &quot;玩家昵称&quot;,
+      &quot;gamename&quot;: &quot;梦之韵&quot;,
+      &quot;email&quot;: &quot;player@example.com&quot;,
+      &quot;status&quot;: &quot;new&quot;,
+      &quot;createdAt&quot;: &quot;2026-09-06T06:30:25.000Z&quot;,
+      &quot;replyCount&quot;: 0,
+      &quot;content&quot;: &quot;加载世界时崩溃&quot;
+    }
+  ]
+}
+</code></pre>
+<hr>
+<h2>5. 管理接口（仅管理员会话）</h2>
+<p>以下接口<strong>不接受 API Token</strong>，必须携带管理员会话 Cookie。</p>
+<h3>5.1 管理员账号管理</h3>
+<pre><code>GET    /api/admin/users                                          # 用户列表
+POST   /api/admin/users                                          # 创建用户（super/admin 可）
+DELETE /api/admin/users/{username}                               # 删除用户
+POST   /api/admin/users/{username}/password                      # 重置密码
+POST   /api/admin/users/{username}/role                          # 调整角色（仅 super）
+</code></pre>
+<ul>
+<li><strong>创建用户</strong> 请求体：<code>{ &quot;username&quot;: &quot;abc&quot;, &quot;name&quot;: &quot;显示名&quot;, &quot;password&quot;: &quot;≥6位&quot;, &quot;role&quot;: &quot;admin&quot; }</code>，用户名限字母/数字/下划线/短横线 2-32 位；创建 <code>super</code> 仅限超级管理员。</li>
+<li><strong>重置密码</strong> 请求体：<code>{ &quot;password&quot;: &quot;新密码&quot; }</code>；非 super 只能改自己。</li>
+<li><strong>调整角色</strong> 请求体：<code>{ &quot;role&quot;: &quot;super&quot; | &quot;admin&quot; }</code>；保护逻辑：不能删除/降级最后一个 super。</li>
+<li>删除自己返回 400。</li>
+</ul>
+<h3>5.2 个人中心</h3>
+<pre><code>POST /api/me/profile     # 更新显示名：{ &quot;name&quot;: &quot;新名字&quot; }
+POST /api/me/password    # 修改密码：{ &quot;oldPassword&quot;: &quot;...&quot;, &quot;newPassword&quot;: &quot;≥6位&quot; }
+</code></pre>
+<h3>5.3 OAuth 绑定（管理员会话）</h3>
+<pre><code>GET  /api/oauth/qq/bind-url        # 返回 SSO 绑定授权 URL：{ &quot;url&quot;: &quot;...&quot; }（兼容旧调用名）
+GET  /api/oauth/github/bind-url    # 返回 SSO 绑定授权 URL：{ &quot;url&quot;: &quot;...&quot; }（兼容旧调用名）
+POST /api/oauth/unbind             # 解绑：{ &quot;provider&quot;: &quot;qq&quot; | &quot;github&quot; | &quot;sso&quot; }
+</code></pre>
+<blockquote>
+<p>绑定/解绑均针对 SSO（<code>provider: &quot;sso&quot;</code>，按 <code>sub</code> 关联）；<code>qq</code> / <code>github</code> 为历史数据兼容保留。</p>
+</blockquote>
+<hr>
+<h2>6. 其他管理接口</h2>
+<h3>6.1 通知邮箱列表（管理员 或 Token）</h3>
+<pre><code>GET    /api/admin/notify-emails                     # { &quot;emails&quot;: [&quot;catkinr@qq.com&quot;] }
+POST   /api/admin/notify-emails                     # 添加：{ &quot;email&quot;: &quot;a@b.com&quot; }
+DELETE /api/admin/notify-emails/{email}             # 移除（email 需 URL 编码）
+</code></pre>
+<p>默认通知邮箱来自 <code>ADMIN_EMAIL</code>。玩家提交工单、追加留言时会给列表中所有邮箱发送通知。</p>
+<h3>6.2 API Token 管理（仅管理员会话）</h3>
+<pre><code>GET    /api/admin/api-tokens          # 列表：{ &quot;tokens&quot;: [{ &quot;id&quot;, &quot;name&quot;, &quot;createdBy&quot;, &quot;createdAt&quot;, &quot;prefix&quot; }] }
+POST   /api/admin/api-tokens          # 创建：{ &quot;name&quot;: &quot;可选&quot; } → { &quot;ok&quot;: true, &quot;id&quot;, &quot;token&quot;: &quot;mz_...&quot;, &quot;name&quot;, &quot;createdAt&quot; }
+DELETE /api/admin/api-tokens/{id}     # 撤销
+</code></pre>
+<blockquote>
+<p><code>token</code> 仅创建时返回一次，请立即保存；列表接口只显示 <code>prefix</code> 前缀。</p>
+</blockquote>
+<hr>
+<h2>7. 通用错误码</h2>
+<table>
+<thead>
+<tr>
+<th>状态码</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td>参数缺失 / 格式错误（校验不通过）</td>
+</tr>
+<tr>
+<td>401</td>
+<td>账号或密码错误 / 未登录 / 会话失效</td>
+</tr>
+<tr>
+<td>403</td>
+<td>权限不足 / token 不匹配 / 邮箱不匹配</td>
+</tr>
+<tr>
+<td>404</td>
+<td>资源不存在（模组、版本、工单、报告等）</td>
+</tr>
+<tr>
+<td>409</td>
+<td>资源冲突（如账号已存在）</td>
+</tr>
+<tr>
+<td>429</td>
+<td>限流（携带 <code>Retry-After</code> 与 <code>retry_after</code> 字段）</td>
+</tr>
+<tr>
+<td>500</td>
+<td>服务器内部错误</td>
+</tr>
+<tr>
+<td>502</td>
+<td>依赖服务失败（邮件发送、模组下载等）</td>
+</tr>
+</tbody></table>
+<p>错误响应统一为：</p>
+<pre><code class="language-json">{ &quot;error&quot;: &quot;人类可读的错误原因&quot; }
+</code></pre>
+<hr>
+<h2>8. 环境变量与 Secrets</h2>
+<h3>环境变量（wrangler.toml <code>[vars]</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ADMIN_LOGIN</code></td>
+<td><code>maoxinhe</code></td>
+<td>默认管理员账号（首次初始化）</td>
+</tr>
+<tr>
+<td><code>ADMIN_EMAIL</code></td>
+<td><code>catkinr@qq.com</code></td>
+<td>工单/错误报告通知默认收件邮箱</td>
+</tr>
+<tr>
+<td><code>BASE_URL</code></td>
+<td><code>https://releases.camzy.uno</code></td>
+<td>站点根地址（SSO 回调地址拼接用）</td>
+</tr>
+<tr>
+<td><code>SSO_CLIENT_ID</code></td>
+<td><code>mzy_jzsmzjxn8r5pujj8</code></td>
+<td>SSO 平台应用 ID</td>
+</tr>
+<tr>
+<td><code>MAX_UPLOAD_MB</code></td>
+<td><code>100</code></td>
+<td>模组上传大小上限（MB）</td>
+</tr>
+<tr>
+<td><code>REPO_OWNER</code> / <code>REPO_NAME</code> / <code>REPO_BRANCH</code></td>
+<td><code>maoxinhe</code> / <code>modpack</code> / <code>main</code></td>
+<td>GitHub 仓库定位</td>
+</tr>
+<tr>
+<td><code>SESSION_TTL_HOURS</code></td>
+<td><code>168</code></td>
+<td>会话有效期（小时）</td>
+</tr>
+<tr>
+<td><code>MAIL_FROM</code></td>
+<td><code>工单系统 &lt;noreply@camzy.uno&gt;</code></td>
+<td>邮件发件人</td>
+</tr>
+<tr>
+<td><code>ERROR_REPORT_*</code></td>
+<td>见代码默认值</td>
+<td>错误报告限流/大小/队列等可调参数</td>
+</tr>
+</tbody></table>
+<h3>Secrets（wrangler secret put）</h3>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GLM_API_KEY</code></td>
+<td>智谱 GLM 大模型密钥（错误报告分析与工单 AI 回复）</td>
+</tr>
+<tr>
+<td><code>RESEND_API_KEY</code></td>
+<td>Resend 邮件服务密钥（验证码 / 通知 / 报告）</td>
+</tr>
+<tr>
+<td><code>SSO_CLIENT_SECRET</code></td>
+<td>SSO 平台应用密钥（OAuth 换 token）</td>
+</tr>
+<tr>
+<td><code>GITHUB_TOKEN</code></td>
+<td>GitHub API 令牌（版本检测 / 发布 / 模组读写）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>9. 定时任务（Cron）</h2>
+<p>每分钟执行一次 <code>scheduled</code> 触发器，职责：</p>
+<ol>
+<li><code>migrateFromKV</code>：幂等地将旧 KV 工单/错误报告数据迁移到 D1（已在库中则跳过，并清理已迁移的 KV 键）；</li>
+<li><code>drainErrorReportQueue</code>：消费错误报告分析队列，逐个调用 GLM 分析并邮件发送结果；</li>
+<li><code>cleanupD1</code>：清理 D1 中超过 14 天的错误报告记录。</li>
+</ol>
+<hr>
+<h2>10. 数据存储结构（D1 为主，KV 为辅）</h2>
+<table>
+<thead>
+<tr>
+<th>存储</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>D1 <code>tickets</code></td>
+<td>工单（<code>id, data(JSON), createdAt</code>）</td>
+</tr>
+<tr>
+<td>D1 <code>error_reports</code></td>
+<td>错误报告（<code>id, data(JSON), createdAt</code>，14 天清理）</td>
+</tr>
+<tr>
+<td>D1 <code>er_rl</code></td>
+<td>错误报告限流计数（复合主键 <code>kind+k</code>）</td>
+</tr>
+<tr>
+<td>D1 <code>er_meta</code></td>
+<td>错误报告队列等元数据</td>
+</tr>
+<tr>
+<td>KV</td>
+<td>会话、验证码、绑定关系、API Token、镜像缓存等短生命周期数据</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>错误报告原始 zip 与模组文件存储</td>
+</tr>
+</tbody></table>
+</div>
+  </div>
+</div>
+<script src="/js/ui.js"></script>
+</body>
+</html>
