@@ -325,6 +325,35 @@ code {
 
 .empty { color: var(--muted); text-align: center; padding: 40px 0; line-height: 1.8; }
 
+/* ============================================================
+   后台 Tab 导航
+   ============================================================ */
+.admin-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 8px; margin-top: 24px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  position: sticky; top: calc(var(--topbar-h) + 10px); z-index: 30;
+}
+.admin-tabs a {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 11px;
+  color: var(--text); font-size: 14px; font-weight: 600;
+  transition: all .15s; white-space: nowrap;
+}
+.admin-tabs a:hover { background: var(--primary-bg); color: var(--primary-dark); text-decoration: none; }
+.admin-tabs a.active { background: linear-gradient(135deg, #ff8fb3, #ff5c8a); color: #fff; box-shadow: 0 4px 14px rgba(255, 92, 138, .3); }
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.oauth-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  background: rgba(157, 134, 255, .1); color: #6d56d6; border: 1px solid rgba(157, 134, 255, .35);
+}
+
 .section-title { margin-top: 40px; font-size: 16px; color: var(--muted); font-weight: 700; }
 
 hr.sep { border: none; border-top: 1px solid var(--border-light); margin: 18px 0; }
