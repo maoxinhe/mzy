@@ -28,7 +28,7 @@ function fmtTime(iso) {
   return new Date(iso).toLocaleString('zh-CN');
 }
 
-const STATUS_MAP = { new: ['新提交', 'pill-green'], replied: ['已回复', 'pill-gray'], closed: ['已关闭', 'pill-red'] };
+const STATUS_MAP = { new: ['新提交', 'pill-green'], replied: ['已回复', 'pill-gray'], auto: ['AI 已回复', 'pill-blue'], closed: ['已关闭', 'pill-red'] };
 
 async function init() {
   try {
@@ -92,12 +92,17 @@ async function openTicket(id) {
 function renderDetail() {
   const t = currentTicket;
   const s = STATUS_MAP[t.status] || ['未知', 'pill-gray'];
-  const replies = (t.replies || []).map((r) => `
-    <div style="background:rgba(255,255,255,.55); border:1px solid var(--border); border-radius:12px; padding:12px 16px; margin-top:10px;">
-      <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">管理员回复 · ${fmtTime(r.at)}</div>
+  const replies = (t.replies || []).map((r) => {
+    const isAi = r.from === 'ai';
+    const who = isAi ? '🤖 AI 自动回复' : (r.from === 'user' ? '玩家留言' : '管理员回复');
+    return `
+    <div style="background:${isAi ? 'rgba(157,134,255,.08)' : 'rgba(255,255,255,.55)'}; border:1px solid ${isAi ? 'rgba(157,134,255,.35)' : 'var(--border)'}; border-radius:12px; padding:12px 16px; margin-top:10px;">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">${who} · ${fmtTime(r.at)}${r.auto ? ' · <span class="pill pill-blue" style="padding:1px 8px;">自动</span>' : ''}</div>
       <div style="white-space:pre-wrap;">${esc(r.content)}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
+  const closed = t.status === 'closed';
   document.getElementById('detailCard').hidden = false;
   document.getElementById('detailId').textContent = `${t.id} · ${s[0]}`;
   document.getElementById('detailId').className = `pill ${s[1]}`;
@@ -112,11 +117,50 @@ function renderDetail() {
     ${replies}
   `;
   document.getElementById('replyContent').value = '';
-  document.getElementById('replyBtn').disabled = t.status === 'closed';
-  document.getElementById('closeBtn').disabled = t.status === 'closed';
+  document.getElementById('aiBtn').disabled = closed;
+  document.getElementById('replyBtn').disabled = closed;
+  document.getElementById('closeBtn').disabled = closed;
+  document.getElementById('closeBtn').textContent = closed ? '🔒 已关闭' : '🔒 关闭工单';
+  document.getElementById('reopenBtn').hidden = !closed;
+  document.getElementById('aiHint').hidden = true;
 }
 
 function bindActions() {
+  document.getElementById('aiBtn').addEventListener('click', async () => {
+    if (!currentTicket) return;
+    const btn = document.getElementById('aiBtn');
+    const hint = document.getElementById('aiHint');
+    btn.disabled = true;
+    btn.textContent = '🤖 AI 思考中…';
+    hint.hidden = true;
+    try {
+      const data = await json('/api/admin/tickets/' + encodeURIComponent(currentTicket.id) + '/ai', { method: 'POST' });
+      document.getElementById('replyContent').value = data.draft || '';
+      hint.innerHTML = `<b>${esc(data.model || 'AI')}</b> 已根据知识库生成草稿，可修改后发送。${(data.sources || []).length ? `引用来源：${esc(data.sources.join('、'))}` : ''}`;
+      hint.hidden = false;
+      toast('AI 草稿已生成', 'ok');
+    } catch (e) {
+      toast('AI 生成失败：' + e.message, 'err');
+    } finally {
+      btn.disabled = currentTicket.status === 'closed';
+      btn.textContent = '🤖 AI 生成回复草稿';
+    }
+  });
+
+  document.getElementById('reopenBtn').addEventListener('click', async () => {
+    if (!currentTicket) return;
+    try {
+      const data = await json('/api/admin/tickets/' + encodeURIComponent(currentTicket.id) + '/reopen', {
+        method: 'POST',
+      });
+      toast('工单已重新打开', 'ok');
+      loadTickets();
+      openTicket(data.ticket.id);
+    } catch (e) {
+      toast('重新打开失败：' + e.message, 'err');
+    }
+  });
+
   document.getElementById('replyBtn').addEventListener('click', async () => {
     if (!currentTicket) return;
     const content = document.getElementById('replyContent').value.trim();

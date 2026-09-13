@@ -51,11 +51,14 @@
         <div id="detailBody" style="line-height:1.9;"></div>
         <hr class="sep">
         <h2 style="font-size:15px;">回复用户（将发送到用户邮箱）</h2>
-        <textarea id="replyContent" class="input" rows="4" style="resize:vertical; margin-top:10px;" placeholder="输入回复内容…"></textarea>
+        <textarea id="replyContent" class="input" rows="4" style="resize:vertical; margin-top:10px;" placeholder="输入回复内容，或点击「AI 生成回复草稿」…"></textarea>
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:14px;">
+          <button id="aiBtn" class="btn btn-blue">🤖 AI 生成回复草稿</button>
           <button id="replyBtn" class="btn btn-primary">💬 发送回复</button>
+          <button id="reopenBtn" class="btn btn-blue" hidden>↩️ 重新打开工单</button>
           <button id="closeBtn" class="btn btn-danger">🔒 关闭工单</button>
         </div>
+        <p id="aiHint" class="empty" hidden style="margin-top:12px; text-align:left;"></p>
       </div>
     </div>
   </div>
